@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+{% from "components/form_macros.html" import render_hot_flag, render_status_badge %}
+
+{% block title %}{{ candidate.first_name }} {{ candidate.last_name }} - Candidates{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">
+            {{ render_hot_flag(candidate.is_hot) }}
+            {{ candidate.first_name }} {{ candidate.last_name }}
+        </h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('candidates.index') }}">Candidates</a></li>
+                <li class="breadcrumb-item active">{{ candidate.first_name }} {{ candidate.last_name }}</li>
+            </ol>
+        </nav>
+    </div>
+    <div>
+        <div class="btn-group">
+            <a href="{{ url_for('candidates.edit', id=candidate.candidate_id) }}" class="btn btn-primary">
+                <i class="bi bi-pencil me-2"></i>Edit
+            </a>
+            <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+                <span class="visually-hidden">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="#" onclick="toggleHot('{{ url_for('candidates.toggle_hot', id=candidate.candidate_id) }}', {{ candidate.candidate_id }})">
+                    <i class="bi bi-fire me-2"></i>{{ 'Remove' if candidate.is_hot else 'Mark as' }} Hot
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="mailto:{{ candidate.email1 }}">
+                    <i class="bi bi-envelope me-2"></i>Send Email
+                </a></li>
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#addToJobModal">
+                    <i class="bi bi-briefcase me-2"></i>Add to Job
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="#" onclick="return confirmDelete('Are you sure you want to delete this candidate?') && fetch('{{ url_for('candidates.delete', id=candidate.candidate_id) }}', {method: 'POST'})">
+                    <i class="bi bi-trash me-2"></i>Delete
+                </a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Main Content -->
+    <div class="col-md-8">
+        <!-- Contact Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-person-vcard me-2"></i>Contact Information
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-2"><strong>Email:</strong></p>
+                        <p><a href="mailto:{{ candidate.email1 }}">{{ candidate.email1 or '-' }}</a></p>
+                        {% if candidate.email2 %}
+                        <p><a href="mailto:{{ candidate.email2 }}">{{ candidate.email2 }}</a></p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-2"><strong>Phone:</strong></p>
+                        {% if candidate.phone_cell %}
+                        <p><i class="bi bi-phone me-2"></i>{{ candidate.phone_cell }} (Cell)</p>
+                        {% endif %}
+                        {% if candidate.phone_work %}
+                        <p><i class="bi bi-telephone me-2"></i>{{ candidate.phone_work }} (Work)</p>
+                        {% endif %}
+                        {% if candidate.phone_home %}
+                        <p><i class="bi bi-house me-2"></i>{{ candidate.phone_home }} (Home)</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if candidate.address or candidate.city %}
+                <hr>
+                <p class="mb-2"><strong>Address:</strong></p>
+                <p class="mb-0">
+                    {{ candidate.address }}<br>
+                    {{ candidate.city }}{% if candidate.state %}, {{ candidate.state }}{% endif %} {{ candidate.zip }}
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Professional Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-briefcase me-2"></i>Professional Information
+            </div>
+            <div class="card-body">
+                {% if candidate.key_skills %}
+                <p class="mb-2"><strong>Key Skills:</strong></p>
+                <p>
+                    {% for skill in candidate.key_skills.split(',') %}
+                    <span class="badge bg-primary me-1 mb-1">{{ skill.strip() }}</span>
+                    {% endfor %}
+                </p>
+                {% endif %}
+
+                {% if candidate.current_employer %}
+                <p class="mb-2"><strong>Current Employer:</strong></p>
+                <p>{{ candidate.current_employer }}</p>
+                {% endif %}
+
+                <div class="row">
+                    {% if candidate.current_pay %}
+                    <div class="col-md-6">
+                        <p class="mb-2"><strong>Current Compensation:</strong></p>
+                        <p>{{ candidate.current_pay }}</p>
+                    </div>
+                    {% endif %}
+                    {% if candidate.desired_pay %}
+                    <div class="col-md-6">
+                        <p class="mb-2"><strong>Desired Compensation:</strong></p>
+                        <p>{{ candidate.desired_pay }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if candidate.notes %}
+                <hr>
+                <p class="mb-2"><strong>Notes:</strong></p>
+                <p class="mb-0">{{ candidate.notes }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pipeline / Job Applications -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-diagram-3 me-2"></i>Job Applications</span>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addToJobModal">
+                    <i class="bi bi-plus-circle me-2"></i>Add to Job
+                </button>
+            </div>
+            <div class="card-body">
+                {% if pipeline_entries %}
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Job Title</th>
+                                <th>Company</th>
+                                <th>Status</th>
+                                <th>Rating</th>
+                                <th>Date Added</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in pipeline_entries %}
+                            <tr>
+                                <td><a href="{{ url_for('joborders.view', id=entry.joborder_id) }}">{{ entry.joborder.title }}</a></td>
+                                <td>{{ entry.joborder.company.name if entry.joborder.company else '-' }}</td>
+                                <td>{{ render_status_badge(entry.status, 'candidate') }}</td>
+                                <td>
+                                    {% if entry.rating_value > 0 %}
+                                    <span class="badge bg-success">+{{ entry.rating_value }}</span>
+                                    {% elif entry.rating_value < 0 %}
+                                    <span class="badge bg-danger">{{ entry.rating_value }}</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">0</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ entry.date_created|date }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center mb-0">Not yet added to any jobs</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Activities -->
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clock-history me-2"></i>Activity History
+            </div>
+            <div class="card-body">
+                {% if activities %}
+                <div class="timeline">
+                    {% for activity in activities %}
+                    <div class="timeline-item">
+                        <strong>{{ activity.type_display }}</strong>
+                        <p class="mb-1">{{ activity.notes }}</p>
+                        <small class="text-muted">{{ activity.date_created|timeago }} by {{ activity.user.username if activity.user else 'System' }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center mb-0">No activity yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <!-- Quick Info -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-info-circle me-2"></i>Quick Info
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    <strong>Status:</strong>
+                    {% if candidate.is_active %}
+                    <span class="badge bg-success">Active</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Inactive</span>
+                    {% endif %}
+                    {% if candidate.is_hot %}
+                    <span class="badge bg-danger">Hot</span>
+                    {% endif %}
+                </p>
+                <p class="mb-2"><strong>Source:</strong> {{ candidate.source or 'Direct' }}</p>
+                <p class="mb-2"><strong>Owner:</strong> {{ candidate.owner_user.username if candidate.owner_user else '-' }}</p>
+                <p class="mb-2"><strong>Created:</strong> {{ candidate.date_created|datetime }}</p>
+                <p class="mb-0"><strong>Modified:</strong> {{ candidate.date_modified|datetime }}</p>
+            </div>
+        </div>
+
+        <!-- Resumes -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-file-earmark-text me-2"></i>Resumes
+            </div>
+            <div class="card-body">
+                {% if candidate.attachments %}
+                <div class="list-group list-group-flush">
+                    {% for attachment in candidate.attachments %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                                <small>{{ attachment.title or attachment.original_filename }}</small><br>
+                                <small class="text-muted">{{ (attachment.file_size / 1024)|round(1) }} KB</small>
+                            </div>
+                            <a href="{{ url_for('candidates.download_resume', id=candidate.candidate_id, attachment_id=attachment.attachment_id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-download"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted small mb-3">No resumes uploaded</p>
+                {% endif %}
+                <a href="{{ url_for('candidates.edit', id=candidate.candidate_id) }}" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-upload me-2"></i>Upload Resume
+                </a>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-lightning-fill me-2"></i>Quick Actions
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="mailto:{{ candidate.email1 }}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-envelope me-2"></i>Send Email
+                </a>
+                <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#addToJobModal">
+                    <i class="bi bi-briefcase me-2"></i>Add to Job
+                </a>
+                <a href="{{ url_for('candidates.edit', id=candidate.candidate_id) }}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-pencil me-2"></i>Edit Candidate
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add to Job Modal -->
+<div class="modal fade" id="addToJobModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add to Job Pipeline</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{{ url_for('candidates.add_to_job', id=candidate.candidate_id) }}">
+                {{ render_csrf(form) }}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Select Job</label>
+                        <select name="joborder_id" class="form-select" required>
+                            <option value="">Choose a job...</option>
+                            {% for job in active_jobs %}
+                            <option value="{{ job.joborder_id }}">{{ job.title }} - {{ job.company.name if job.company else '' }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Initial Status</label>
+                        <select name="status" class="form-select">
+                            <option value="0">No Contact</option>
+                            <option value="200" selected>Contacted</option>
+                            <option value="400">Submitted</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add to Job</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% from "components/form_macros.html" import render_pagination, render_hot_flag, render_empty_state %}
+
+{% block title %}Candidates - {{ current_user.site.name }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">Candidates</h1>
+        <p class="text-muted">Manage your candidate database</p>
+    </div>
+    <div>
+        <a href="{{ url_for('candidates.add') }}" class="btn btn-primary">
+            <i class="bi bi-person-plus me-2"></i>Add Candidate
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Search and Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="{{ url_for('candidates.index') }}" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Search name, email, skills..." value="{{ request.args.get('search', '') }}">
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="active" {% if request.args.get('status') == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if request.args.get('status') == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" name="hot_only" value="true" {% if request.args.get('hot_only') %}checked{% endif %}>
+                    <label class="form-check-label">Hot Only</label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search me-2"></i>Search
+                </button>
+                <a href="{{ url_for('candidates.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-2"></i>Clear
+                </a>
+                <button type="button" class="btn btn-outline-info" onclick="exportTableToCSV('candidates.csv')">
+                    <i class="bi bi-download me-2"></i>Export
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>
+            <i class="bi bi-people me-2"></i>
+            Candidates ({{ pagination.total if pagination else 0 }})
+        </span>
+        <div class="btn-group btn-group-sm">
+            <a href="{{ url_for('candidates.index', view='grid') }}" class="btn btn-outline-secondary {% if request.args.get('view') == 'grid' %}active{% endif %}">
+                <i class="bi bi-grid-3x3-gap"></i>
+            </a>
+            <a href="{{ url_for('candidates.index', view='list') }}" class="btn btn-outline-secondary {% if request.args.get('view') != 'grid' %}active{% endif %}">
+                <i class="bi bi-list-ul"></i>
+            </a>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        {% if candidates %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Skills</th>
+                            <th>Status</th>
+                            <th>Added</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for candidate in candidates %}
+                        <tr data-href="{{ url_for('candidates.view', id=candidate.candidate_id) }}">
+                            <td>
+                                {{ render_hot_flag(candidate.is_hot) }}
+                                <strong>{{ candidate.first_name }} {{ candidate.last_name }}</strong>
+                            </td>
+                            <td>
+                                <a href="mailto:{{ candidate.email1 }}" onclick="event.stopPropagation()">
+                                    {{ candidate.email1 or '-' }}
+                                </a>
+                            </td>
+                            <td>{{ candidate.phone_cell or candidate.phone_work or '-' }}</td>
+                            <td>
+                                <span class="text-truncate-2">{{ candidate.key_skills|truncate(50) or '-' }}</span>
+                            </td>
+                            <td>
+                                {% if candidate.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ candidate.date_created|date }}</td>
+                            <td onclick="event.stopPropagation()">
+                                <a href="{{ url_for('candidates.view', id=candidate.candidate_id) }}" class="btn btn-sm btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('candidates.edit', id=candidate.candidate_id) }}" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {{ render_pagination(pagination, 'candidates.index') }}
+        {% else %}
+            {{ render_empty_state('person-x', 'No Candidates Found', 'Start building your candidate database by adding your first candidate.', url_for('candidates.add'), 'Add First Candidate') }}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
