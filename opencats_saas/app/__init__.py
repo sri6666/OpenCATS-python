@@ -48,6 +48,7 @@ def create_app(config_name=None):
     from app.api import api_bp
     from app.main import main_bp
     from app.admin import admin_bp
+    from app.billing import billing_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
@@ -57,6 +58,7 @@ def create_app(config_name=None):
     app.register_blueprint(contacts_bp, url_prefix='/contacts')
     app.register_blueprint(api_bp, url_prefix='/api/v1')
     app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(billing_bp, url_prefix='/billing')
 
     # Register error handlers
     register_error_handlers(app)
