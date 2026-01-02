@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="OpenCATS - Applicant Tracking System">
+    <title>{% block title %}OpenCATS SaaS{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% include 'components/navbar.html' %}
+
+    <div class="container-fluid">
+        <div class="row">
+            {% if current_user.is_authenticated %}
+                {% include 'components/sidebar.html' %}
+
+                <!-- Main Content -->
+                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                    {% include 'components/flash_messages.html' %}
+
+                    <!-- Breadcrumb -->
+                    {% block breadcrumb %}{% endblock %}
+
+                    <!-- Page Header -->
+                    {% block page_header %}{% endblock %}
+
+                    <!-- Content -->
+                    {% block content %}{% endblock %}
+                </main>
+            {% else %}
+                <!-- Full Width for Public Pages -->
+                <main class="col-12">
+                    {% include 'components/flash_messages.html' %}
+                    {% block content %}{% endblock %}
+                </main>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Footer -->
+    {% include 'components/footer.html' %}
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- jQuery (for legacy compatibility) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

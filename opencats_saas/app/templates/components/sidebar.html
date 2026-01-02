@@ -1,0 +1,116 @@
+<nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+    <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+            <!-- Dashboard -->
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}" href="{{ url_for('main.dashboard') }}">
+                    <i class="bi bi-speedometer2 me-2"></i>
+                    Dashboard
+                </a>
+            </li>
+
+            <!-- Candidates -->
+            <li class="nav-item">
+                <a class="nav-link {% if 'candidates' in request.endpoint %}active{% endif %}" href="{{ url_for('candidates.index') }}">
+                    <i class="bi bi-people me-2"></i>
+                    Candidates
+                </a>
+            </li>
+
+            <!-- Job Orders -->
+            <li class="nav-item">
+                <a class="nav-link {% if 'joborders' in request.endpoint %}active{% endif %}" href="{{ url_for('joborders.index') }}">
+                    <i class="bi bi-briefcase me-2"></i>
+                    Job Orders
+                </a>
+            </li>
+
+            <!-- Companies -->
+            <li class="nav-item">
+                <a class="nav-link {% if 'companies' in request.endpoint %}active{% endif %}" href="{{ url_for('companies.index') }}">
+                    <i class="bi bi-building me-2"></i>
+                    Companies
+                </a>
+            </li>
+
+            <!-- Contacts -->
+            <li class="nav-item">
+                <a class="nav-link {% if 'contacts' in request.endpoint %}active{% endif %}" href="{{ url_for('contacts.index') }}">
+                    <i class="bi bi-person-vcard me-2"></i>
+                    Contacts
+                </a>
+            </li>
+
+            <li><hr class="dropdown-divider"></li>
+
+            <!-- Calendar -->
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'main.calendar' %}active{% endif %}" href="{{ url_for('main.calendar') }}">
+                    <i class="bi bi-calendar3 me-2"></i>
+                    Calendar
+                </a>
+            </li>
+
+            <!-- Activities -->
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'main.activities' %}active{% endif %}" href="{{ url_for('main.activities') }}">
+                    <i class="bi bi-clock-history me-2"></i>
+                    Activities
+                </a>
+            </li>
+
+            <!-- Reports -->
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'main.reports' %}active{% endif %}" href="{{ url_for('main.reports') }}">
+                    <i class="bi bi-bar-chart me-2"></i>
+                    Reports
+                </a>
+            </li>
+
+            <li><hr class="dropdown-divider"></li>
+
+            <!-- Settings -->
+            <li class="nav-item">
+                <a class="nav-link {% if request.endpoint == 'main.settings' %}active{% endif %}" href="{{ url_for('main.settings') }}">
+                    <i class="bi bi-gear me-2"></i>
+                    Settings
+                </a>
+            </li>
+
+            {% if current_user.is_admin %}
+                <!-- Admin -->
+                <li class="nav-item">
+                    <a class="nav-link {% if 'admin' in request.endpoint %}active{% endif %}" href="{{ url_for('admin.index') }}">
+                        <i class="bi bi-shield-lock me-2"></i>
+                        Admin
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+
+        <!-- Plan Info -->
+        {% if current_user.site %}
+            <div class="mt-4 px-3">
+                <div class="card border-primary">
+                    <div class="card-body p-2">
+                        <h6 class="card-title mb-1">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            {{ current_user.site.subscription_plan|title }} Plan
+                        </h6>
+
+                        {% if current_user.site.subscription_status == 'trial' %}
+                            <p class="card-text small mb-1">
+                                <span class="badge bg-info">Trial</span>
+                                {{ ((current_user.site.trial_ends_at - now()).days) }} days left
+                            </p>
+                        {% endif %}
+
+                        <a href="{{ url_for('admin.billing') }}" class="btn btn-sm btn-outline-primary w-100">
+                            Upgrade
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</nav>
