@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% from "components/form_macros.html" import render_field, render_csrf %}
+
+{% block title %}Sign Up - OpenCATS{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center my-5">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-rocket-takeoff-fill text-primary" style="font-size: 3rem;"></i>
+                        <h2 class="mt-3">Start Your Free Trial</h2>
+                        <p class="text-muted">14 days free • No credit card required</p>
+                    </div>
+
+                    <form method="post" action="{{ url_for('auth.signup') }}" class="needs-validation" novalidate>
+                        {{ render_csrf(form) }}
+
+                        <h5 class="mb-3">Company Information</h5>
+
+                        {{ render_field(form.company_name, placeholder='Your Company Name') }}
+                        {{ render_field(form.subdomain, placeholder='yourcompany') }}
+                        <small class="form-text text-muted mb-3">
+                            Your site will be: <strong>{{ form.subdomain.data or 'yourcompany' }}.opencats.com</strong>
+                        </small>
+
+                        <h5 class="mt-4 mb-3">Admin Account</h5>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ render_field(form.first_name, placeholder='First Name') }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ render_field(form.last_name, placeholder='Last Name') }}
+                            </div>
+                        </div>
+
+                        {{ render_field(form.email, placeholder='admin@yourcompany.com') }}
+                        {{ render_field(form.username, placeholder='Choose a username') }}
+                        {{ render_field(form.password, placeholder='Strong password (8+ chars)') }}
+                        {{ render_field(form.confirm_password, placeholder='Confirm password') }}
+
+                        <div class="mb-3 form-check">
+                            {{ form.accept_terms(class="form-check-input", required=true) }}
+                            {{ form.accept_terms.label(class="form-check-label") }}
+                            I agree to the <a href="#" target="_blank">Terms of Service</a> and
+                            <a href="#" target="_blank">Privacy Policy</a>
+                        </div>
+
+                        {{ render_field(form.submit) }}
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="mb-0">Already have an account?</p>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary mt-2">
+                            Sign In
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="row mt-4">
+                <div class="col-md-4 text-center">
+                    <i class="bi bi-people-fill text-primary fs-2"></i>
+                    <p class="small mt-2">Unlimited Candidates</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="bi bi-briefcase-fill text-primary fs-2"></i>
+                    <p class="small mt-2">Job Management</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="bi bi-graph-up text-primary fs-2"></i>
+                    <p class="small mt-2">Analytics & Reports</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
