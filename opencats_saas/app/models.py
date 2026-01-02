@@ -101,6 +101,9 @@ class Site(BaseModel):
     # Usage tracking
     storage_used_mb = db.Column(db.Integer, default=0)
 
+    # API Access (Enterprise plan only)
+    api_key = db.Column(db.String(64), unique=True, nullable=True, index=True)
+
     # Relationships
     users = db.relationship('User', backref='site', lazy='dynamic')
     candidates = db.relationship('Candidate', backref='site', lazy='dynamic')
