@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% from "components/form_macros.html" import render_pagination, render_hot_flag, render_status_badge, render_empty_state %}
+
+{% block title %}Job Orders - {{ current_user.site.name }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">Job Orders</h1>
+        <p class="text-muted">Manage your job openings and pipeline</p>
+    </div>
+    <div>
+        <a href="{{ url_for('joborders.add') }}" class="btn btn-success">
+            <i class="bi bi-briefcase me-2"></i>Add Job Order
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Search and Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="{{ url_for('joborders.index') }}" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Search job title, description..." value="{{ request.args.get('search', '') }}">
+            </div>
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="0" {% if request.args.get('status') == '0' %}selected{% endif %}>Active</option>
+                    <option value="1" {% if request.args.get('status') == '1' %}selected{% endif %}>On Hold</option>
+                    <option value="2" {% if request.args.get('status') == '2' %}selected{% endif %}>Closed</option>
+                    <option value="4" {% if request.args.get('status') == '4' %}selected{% endif %}>Filled</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" name="hot_only" value="true" {% if request.args.get('hot_only') %}checked{% endif %}>
+                    <label class="form-check-label">Hot Only</label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search me-2"></i>Search
+                </button>
+                <a href="{{ url_for('joborders.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-2"></i>Clear
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>
+            <i class="bi bi-briefcase me-2"></i>
+            Job Orders ({{ pagination.total if pagination else 0 }})
+        </span>
+    </div>
+    <div class="card-body p-0">
+        {% if jobs %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Job Title</th>
+                            <th>Company</th>
+                            <th>Type</th>
+                            <th>Openings</th>
+                            <th>Candidates</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in jobs %}
+                        <tr data-href="{{ url_for('joborders.view', id=job.joborder_id) }}">
+                            <td>
+                                {{ render_hot_flag(job.is_hot) }}
+                                <strong>{{ job.title }}</strong>
+                            </td>
+                            <td>{{ job.company.name if job.company else '-' }}</td>
+                            <td>
+                                {% if job.type == 1 %}Full-time
+                                {% elif job.type == 2 %}Part-time
+                                {% elif job.type == 3 %}Contract
+                                {% elif job.type == 4 %}Temporary
+                                {% elif job.type == 5 %}Freelance
+                                {% else %}-{% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-info">{{ job.openings_available }} / {{ job.openings }}</span>
+                            </td>
+                            <td>{{ job.pipeline_count or 0 }}</td>
+                            <td>{{ render_status_badge(job.status, 'job') }}</td>
+                            <td>{{ job.date_created|date }}</td>
+                            <td onclick="event.stopPropagation()">
+                                <a href="{{ url_for('joborders.view', id=job.joborder_id) }}" class="btn btn-sm btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('joborders.pipeline', id=job.joborder_id) }}" class="btn btn-sm btn-outline-success" title="Pipeline">
+                                    <i class="bi bi-diagram-3"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {{ render_pagination(pagination, 'joborders.index') }}
+        {% else %}
+            {{ render_empty_state('briefcase-fill', 'No Job Orders Found', 'Start posting job openings to attract top talent.', url_for('joborders.add'), 'Create First Job') }}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
