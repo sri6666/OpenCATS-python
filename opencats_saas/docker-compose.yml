@@ -1,0 +1,154 @@
+version: '3.8'
+
+services:
+  # Flask application
+  web:
+    build: .
+    container_name: opencats-web
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=mysql+pymysql://opencats:${MYSQL_PASSWORD}@db:3306/opencats_saas
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    depends_on:
+      - db
+      - redis
+    networks:
+      - opencats-network
+    command: gunicorn --bind 0.0.0.0:5000 --workers 4 --threads 2 --timeout 60 run:app
+
+  # Celery worker
+  celery-worker:
+    build: .
+    container_name: opencats-celery
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=mysql+pymysql://opencats:${MYSQL_PASSWORD}@db:3306/opencats_saas
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+    depends_on:
+      - db
+      - redis
+    networks:
+      - opencats-network
+    command: celery -A app.extensions.celery_app worker --loglevel=info
+
+  # Celery beat (periodic tasks)
+  celery-beat:
+    build: .
+    container_name: opencats-celery-beat
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=mysql+pymysql://opencats:${MYSQL_PASSWORD}@db:3306/opencats_saas
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/1
+    depends_on:
+      - db
+      - redis
+    networks:
+      - opencats-network
+    command: celery -A app.extensions.celery_app beat --loglevel=info
+
+  # MySQL database
+  db:
+    image: mysql:8.0
+    container_name: opencats-db
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=opencats_saas
+      - MYSQL_USER=opencats
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - opencats-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: opencats-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - opencats-network
+    command: redis-server --appendonly yes
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: opencats-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./uploads:/app/uploads:ro
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    depends_on:
+      - web
+    networks:
+      - opencats-network
+
+  # Certbot for SSL
+  certbot:
+    image: certbot/certbot
+    container_name: opencats-certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+  # Elasticsearch (optional - for search)
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: opencats-elasticsearch
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - opencats-network
+    profiles:
+      - with-search
+
+volumes:
+  mysql-data:
+  redis-data:
+  elasticsearch-data:
+
+networks:
+  opencats-network:
+    driver: bridge
