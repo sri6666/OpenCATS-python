@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "components/form_macros.html" import render_field, render_csrf %}
+
+{% block title %}Add Department - {{ company.name }} - {{ current_user.site.name }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">Add Department</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('companies.index') }}">Companies</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('companies.show', id=company.company_id) }}">{{ company.name }}</a></li>
+                <li class="breadcrumb-item active">Add Department</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-diagram-3 me-2"></i>Department Information
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {{ render_csrf(form) }}
+                    {{ render_field(form.name) }}
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <a href="{{ url_for('companies.show', id=company.company_id) }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Cancel
+                        </a>
+                        {{ render_field(form.submit) }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

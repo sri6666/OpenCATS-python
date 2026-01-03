@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% from "components/form_macros.html" import render_field, render_csrf %}
+
+{% block title %}Add Candidate to {{ joborder.title }} - {{ current_user.site.name }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">Add Candidate to Pipeline</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('joborders.index') }}">Job Orders</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('joborders.show', id=joborder.joborder_id) }}">{{ joborder.title }}</a></li>
+                <li class="breadcrumb-item active">Add Candidate</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-person-plus me-2"></i>Select Candidate
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {{ render_csrf(form) }}
+                    {{ render_field(form.candidate_id) }}
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <a href="{{ url_for('joborders.pipeline', id=joborder.joborder_id) }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Cancel
+                        </a>
+                        {{ render_field(form.submit) }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% from "components/form_macros.html" import render_field, render_csrf %}
+
+{% block title %}Potential Duplicates Found - {{ current_user.site.name }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">Potential Duplicates Found</h1>
+        <p class="text-muted">The following candidates may already exist in the system</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>Duplicate Check:</strong> We found {{ duplicates|length }} potential match{{ 'es' if duplicates|length != 1 else '' }}.
+        </div>
+
+        {% if duplicates %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-people me-2"></i>Existing Candidates
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% for duplicate in duplicates %}
+                    <a href="{{ url_for('candidates.show', id=duplicate.candidate_id) }}" target="_blank" class="list-group-item list-group-item-action">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>{{ duplicate.full_name }}</strong><br>
+                                <small class="text-muted">
+                                    {{ duplicate.email1 }}
+                                    {% if duplicate.phone_cell %} | {{ duplicate.phone_cell }}{% endif %}
+                                </small>
+                            </div>
+                            <span class="badge bg-info align-self-center">View</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-question-circle me-2"></i>What would you like to do?
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {{ render_csrf(form) }}
+                    <input type="hidden" name="ignore_duplicates" value="1">
+
+                    <!-- Include all form fields as hidden -->
+                    {% for field in form %}
+                        {% if field.widget.input_type != 'hidden' and field.name != 'csrf_token' and field.name != 'submit' %}
+                            <input type="hidden" name="{{ field.name }}" value="{{ field.data or '' }}">
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-person-plus me-2"></i>Add Anyway
+                        </button>
+                        <a href="{{ url_for('candidates.index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

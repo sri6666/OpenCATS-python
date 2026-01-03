@@ -111,7 +111,7 @@ def show(id):
         data_item_id=joborder.joborder_id
     ).order_by(Activity.date_created.desc()).limit(10).all()
 
-    return render_template('joborders/show.html',
+    return render_template('joborders/view.html',
                          joborder=joborder,
                          pipeline_entries=pipeline_entries,
                          pipeline_by_status=pipeline_by_status,

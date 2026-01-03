@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ joborder.title }} - Job Order - {{ current_user.site.name }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">{{ joborder.title }}</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('joborders.index') }}">Job Orders</a></li>
+                <li class="breadcrumb-item active">{{ joborder.title }}</li>
+            </ol>
+        </nav>
+    </div>
+    <div>
+        <a href="{{ url_for('joborders.edit', id=joborder.joborder_id) }}" class="btn btn-primary">
+            <i class="bi bi-pencil me-2"></i>Edit
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <!-- Job Details -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-briefcase me-2"></i>Job Details
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Company</dt>
+                    <dd class="col-sm-9">
+                        <a href="{{ url_for('companies.show', id=joborder.company_id) }}">
+                            {{ joborder.company.name }}
+                        </a>
+                    </dd>
+                    <dt class="col-sm-3">Status</dt>
+                    <dd class="col-sm-9">
+                        {% if joborder.status == 1 %}
+                        <span class="badge bg-success">Active</span>
+                        {% elif joborder.status == 2 %}
+                        <span class="badge bg-warning">On Hold</span>
+                        {% elif joborder.status == 3 %}
+                        <span class="badge bg-secondary">Closed</span>
+                        {% elif joborder.status == 4 %}
+                        <span class="badge bg-info">Filled</span>
+                        {% endif %}
+                    </dd>
+                    <dt class="col-sm-3">Openings</dt>
+                    <dd class="col-sm-9">{{ joborder.openings_available }} / {{ joborder.openings }}</dd>
+                    {% if joborder.salary %}
+                    <dt class="col-sm-3">Salary</dt>
+                    <dd class="col-sm-9">{{ joborder.salary }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+
+        <!-- Description -->
+        {% if joborder.description %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-file-text me-2"></i>Description
+            </div>
+            <div class="card-body">
+                {{ joborder.description|safe }}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Pipeline -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-funnel me-2"></i>Pipeline</span>
+                <a href="{{ url_for('joborders.pipeline', id=joborder.joborder_id) }}" class="btn btn-sm btn-primary">
+                    View Kanban
+                </a>
+            </div>
+            <div class="card-body">
+                {% if pipeline_entries %}
+                <div class="list-group">
+                    {% for entry in pipeline_entries[:5] %}
+                    <a href="{{ url_for('candidates.show', id=entry.candidate_id) }}" class="list-group-item list-group-item-action">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ entry.candidate.full_name }}</strong>
+                            <span class="badge bg-secondary">{{ entry.get_status_display() }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No candidates in pipeline yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-lightning me-2"></i>Quick Actions
+            </div>
+            <div class="card-body">
+                <a href="{{ url_for('joborders.add_candidate', job_id=joborder.joborder_id) }}" class="btn btn-primary w-100 mb-2">
+                    <i class="bi bi-person-plus me-2"></i>Add Candidate
+                </a>
+                <a href="{{ url_for('joborders.pipeline', id=joborder.joborder_id) }}" class="btn btn-outline-primary w-100 mb-2">
+                    <i class="bi bi-kanban me-2"></i>View Pipeline
+                </a>
+            </div>
+        </div>
+
+        <!-- Activity -->
+        {% if activities %}
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clock-history me-2"></i>Recent Activity
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    {% for activity in activities[:5] %}
+                    <div class="list-group-item px-0">
+                        <small class="text-muted">{{ activity.date_created.strftime('%m/%d/%Y') }}</small>
+                        <p class="mb-0 small">{{ activity.notes }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

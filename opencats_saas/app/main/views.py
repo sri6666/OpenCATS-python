@@ -31,7 +31,7 @@ def dashboard():
         'active_jobs': JobOrder.query_for_site(site_id).filter_by(status=0, is_admin_hidden=False).count(),
         'openings': get_total_openings(site_id),
         'companies': Company.query_for_site(site_id).filter_by(is_admin_hidden=False).count(),
-        'contacts': Contact.query_for_site(site_id).filter_by(is_admin_hidden=False).count(),
+        'contacts': Contact.query_for_site(site_id).count(),
         'placements_this_month': get_placements_count(site_id, 'month'),
     }
 
@@ -111,6 +111,20 @@ def global_search():
     }
 
     return render_template('main/search.html', query=query, results=results)
+
+
+@main_bp.route('/profile')
+@login_required
+def profile():
+    """User profile page"""
+    return render_template('main/profile.html')
+
+
+@main_bp.route('/settings')
+@login_required
+def settings():
+    """User settings page"""
+    return render_template('main/settings.html')
 
 
 @main_bp.route('/health')

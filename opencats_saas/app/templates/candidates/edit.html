@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% from "components/form_macros.html" import render_field, render_csrf %}
+
+{% block title %}Edit {{ candidate.full_name }} - {{ current_user.site.name }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">Edit Candidate</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('candidates.index') }}">Candidates</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('candidates.show', id=candidate.candidate_id) }}">{{ candidate.full_name }}</a></li>
+                <li class="breadcrumb-item active">Edit</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {{ render_csrf(form) }}
+
+            <!-- Personal Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-person me-2"></i>Personal Information
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {{ render_field(form.first_name) }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ render_field(form.middle_name) }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ render_field(form.last_name) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-envelope me-2"></i>Contact Information
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ render_field(form.email1) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ render_field(form.email2) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            {{ render_field(form.phone_cell) }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ render_field(form.phone_work) }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ render_field(form.phone_home) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('candidates.show', id=candidate.candidate_id) }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-2"></i>Cancel
+                </a>
+                {{ render_field(form.submit) }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

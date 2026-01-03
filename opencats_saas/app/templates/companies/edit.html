@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% from "components/form_macros.html" import render_field, render_csrf %}
+
+{% block title %}Edit {{ company.name }} - {{ current_user.site.name }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">Edit Company</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('companies.index') }}">Companies</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('companies.show', id=company.company_id) }}">{{ company.name }}</a></li>
+                <li class="breadcrumb-item active">Edit</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <form method="post" class="needs-validation" novalidate>
+            {{ render_csrf(form) }}
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-building me-2"></i>Company Information
+                </div>
+                <div class="card-body">
+                    {{ render_field(form.name) }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ render_field(form.phone1) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ render_field(form.phone2) }}
+                        </div>
+                    </div>
+                    {{ render_field(form.address) }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ render_field(form.city) }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ render_field(form.state) }}
+                        </div>
+                        <div class="col-md-3">
+                            {{ render_field(form.zip) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('companies.show', id=company.company_id) }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-2"></i>Cancel
+                </a>
+                {{ render_field(form.submit) }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

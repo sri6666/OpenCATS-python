@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% from "components/form_macros.html" import render_field, render_csrf %}
+
+{% block title %}Search Job Orders - {{ current_user.site.name }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">Search Job Orders</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('joborders.index') }}">Job Orders</a></li>
+                <li class="breadcrumb-item active">Search</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-search me-2"></i>Search Criteria
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {{ render_csrf(form) }}
+                    {{ render_field(form.title) }}
+                    {{ render_field(form.company_id) }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ render_field(form.status) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ render_field(form.type) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ render_field(form.city) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ render_field(form.state) }}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <a href="{{ url_for('joborders.index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle me-2"></i>Cancel
+                        </a>
+                        {{ render_field(form.submit) }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% from "components/form_macros.html" import render_field, render_csrf %}
+
+{% block title %}Edit {{ contact.full_name }} - {{ current_user.site.name }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">Edit Contact</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('contacts.index') }}">Contacts</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('contacts.show', id=contact.contact_id) }}">{{ contact.full_name }}</a></li>
+                <li class="breadcrumb-item active">Edit</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <form method="post" class="needs-validation" novalidate>
+            {{ render_csrf(form) }}
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-person me-2"></i>Contact Information
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ render_field(form.first_name) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ render_field(form.last_name) }}
+                        </div>
+                    </div>
+                    {{ render_field(form.title) }}
+                    {{ render_field(form.company_id) }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ render_field(form.email1) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ render_field(form.email2) }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            {{ render_field(form.phone_work) }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ render_field(form.phone_cell) }}
+                        </div>
+                        <div class="col-md-4">
+                            {{ render_field(form.phone_other) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('contacts.show', id=contact.contact_id) }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-2"></i>Cancel
+                </a>
+                {{ render_field(form.submit) }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

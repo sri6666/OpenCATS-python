@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% from "components/form_macros.html" import render_field, render_csrf %}
+
+{% block title %}Add Job Order - {{ current_user.site.name }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">Add Job Order</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('joborders.index') }}">Job Orders</a></li>
+                <li class="breadcrumb-item active">Add</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <form method="post" class="needs-validation" novalidate>
+            {{ render_csrf(form) }}
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-briefcase me-2"></i>Job Information
+                </div>
+                <div class="card-body">
+                    {{ render_field(form.title) }}
+                    {{ render_field(form.company_id) }}
+                    {{ render_field(form.contact_id) }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ render_field(form.openings) }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ render_field(form.type) }}
+                        </div>
+                    </div>
+                    {{ render_field(form.description) }}
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('joborders.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-2"></i>Cancel
+                </a>
+                {{ render_field(form.submit) }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
