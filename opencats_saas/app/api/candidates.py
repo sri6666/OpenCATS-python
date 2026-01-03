@@ -8,7 +8,7 @@ from app.api.schemas import (
     candidate_schema, candidates_schema,
     pipeline_entry_schema, pipeline_entries_schema
 )
-from app.models import Candidate, CandidateJobOrder, Attachment, Activity
+from app.models import Candidate, CandidateJobOrder, Attachment, Activity, JobOrder
 from app.extensions import db
 from sqlalchemy import or_
 from marshmallow import ValidationError
@@ -379,3 +379,72 @@ def get_candidate_activities(current_user, id):
     ]
 
     return jsonify({'data': data}), 200
+
+@api_bp.route('/pipeline', methods=['POST'])
+@token_required
+def create_pipeline_entry(current_user):
+    """
+    Add candidate to job pipeline (standalone endpoint)
+
+    POST /api/v1/pipeline
+    {
+        "candidate_id": 123,
+        "joborder_id": 45,
+        "status": 200
+    }
+    """
+    data = request.json
+
+    if not data or not data.get('candidate_id') or not data.get('joborder_id'):
+        return jsonify({'error': 'candidate_id and joborder_id are required'}), 400
+
+    candidate_id = data['candidate_id']
+    joborder_id = data['joborder_id']
+
+    # Verify candidate exists
+    candidate = Candidate.query_for_site(current_user.site_id).filter_by(candidate_id=candidate_id).first()
+    if not candidate or candidate.is_admin_hidden:
+        return jsonify({'error': 'Candidate not found'}), 404
+
+    # Verify job exists
+    job = JobOrder.query_for_site(current_user.site_id).filter_by(joborder_id=joborder_id).first()
+    if not job or job.is_admin_hidden:
+        return jsonify({'error': 'Job order not found'}), 404
+
+    # Check if already in pipeline
+    existing = CandidateJobOrder.query_for_site(current_user.site_id).filter_by(
+        candidate_id=candidate_id,
+        joborder_id=joborder_id
+    ).first()
+
+    if existing:
+        return jsonify({
+            'error': 'Already in pipeline',
+            'message': 'Candidate is already associated with this job'
+        }), 409
+
+    # Create pipeline entry
+    entry = CandidateJobOrder(
+        site_id=current_user.site_id,
+        candidate_id=candidate_id,
+        joborder_id=joborder_id,
+        status=data.get('status', 0),
+        entered_by=current_user.user_id
+    )
+
+    db.session.add(entry)
+    db.session.commit()
+
+    # Log activity
+    activity = Activity(
+        site_id=current_user.site_id,
+        data_item_id=candidate_id,
+        data_item_type=100,  # Candidate
+        type=700,  # Pipeline Change
+        entered_by=current_user.user_id,
+        notes=f'Added to job {joborder_id} pipeline via API'
+    )
+    db.session.add(activity)
+    db.session.commit()
+
+    return jsonify(pipeline_entry_schema.dump(entry)), 201

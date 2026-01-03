@@ -111,7 +111,9 @@ class TestCandidateAPI:
         assert response.status_code == 200
 
         data = json.loads(response.data)
-        if isinstance(data, dict) and 'candidates' in data:
+        if isinstance(data, dict) and 'data' in data:
+            candidates = data['data']
+        elif isinstance(data, dict) and 'candidates' in data:
             candidates = data['candidates']
         else:
             candidates = data
