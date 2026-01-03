@@ -152,7 +152,6 @@ def test_contact(db_session, test_site, test_company, admin_user):
         title='HR Manager',
         email1='john.smith@techinnovations.com',
         phone_work='555-0101',
-        is_admin_hidden=False,
         entered_by=admin_user.user_id
     )
     db_session.add(contact)
@@ -192,9 +191,8 @@ def test_job(db_session, test_site, test_company, test_contact, admin_user):
         contact_id=test_contact.contact_id,
         title='Senior Python Developer',
         description='We are looking for an experienced Python developer...',
-        type='H',  # Full-time
+        type=1,  # 1=Permanent
         duration='Permanent',
-        rate_max='150000',
         salary='120000-150000',
         status=0,  # Active
         openings=2,

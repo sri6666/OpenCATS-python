@@ -174,7 +174,7 @@ class TestJobOrderModel:
             recruiter=admin_user.user_id,
             company_id=test_company.company_id,
             title='Software Engineer',
-            type='H',
+            type=1,
             status=0,
             openings=3,
             openings_available=3,
@@ -203,7 +203,7 @@ class TestJobOrderModel:
         other_job = JobOrder(
             site_id=other_site.site_id,
             title='Other Job',
-            type='H',
+            type=1,
             status=0,
             openings=1,
             is_admin_hidden=False
@@ -264,7 +264,6 @@ class TestContactModel:
             title='Recruiter',
             email1='jane.doe@company.com',
             phone_work='555-2000',
-            is_admin_hidden=False,
             entered_by=admin_user.user_id
         )
         db_session.add(contact)

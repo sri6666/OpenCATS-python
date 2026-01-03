@@ -175,7 +175,7 @@ class TestJobOrderAPI:
         job_data = {
             'title': 'Full Stack Developer',
             'company_id': test_company.company_id,
-            'type': 'H',
+            'type': 1,
             'status': 0,
             'openings': 2,
             'city': 'New York',

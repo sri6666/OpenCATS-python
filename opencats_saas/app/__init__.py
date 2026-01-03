@@ -50,7 +50,7 @@ def create_app(config_name=None):
     from app.admin import admin_bp
     from app.billing import billing_bp
 
-    app.register_blueprint(auth_bp)
+    app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(main_bp)
     app.register_blueprint(candidates_bp, url_prefix='/candidates')
     app.register_blueprint(joborders_bp, url_prefix='/joborders')
