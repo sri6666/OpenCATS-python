@@ -98,7 +98,7 @@
                             </td>
                             <td>{{ candidate.phone_cell or candidate.phone_work or '-' }}</td>
                             <td>
-                                <span class="text-truncate-2">{{ candidate.key_skills|truncate(50) or '-' }}</span>
+                                <span class="text-truncate-2">{{ (candidate.key_skills or '-')|truncate(50) }}</span>
                             </td>
                             <td>
                                 {% if candidate.is_active %}
