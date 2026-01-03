@@ -17,13 +17,18 @@ def app():
     # Create temporary database file
     db_fd, db_path = tempfile.mkstemp()
 
-    app = create_app('testing')
+    # Set environment variable to prevent loading .env
+    os.environ['TESTING'] = '1'
+
+    app = create_app()
     app.config.update({
         'TESTING': True,
         'SQLALCHEMY_DATABASE_URI': f'sqlite:///{db_path}',
+        'SQLALCHEMY_TRACK_MODIFICATIONS': False,
         'WTF_CSRF_ENABLED': False,  # Disable CSRF for testing
         'SECRET_KEY': 'test-secret-key',
         'MAIL_SUPPRESS_SEND': True,  # Don't actually send emails
+        'SERVER_NAME': 'localhost.localdomain',
     })
 
     yield app
