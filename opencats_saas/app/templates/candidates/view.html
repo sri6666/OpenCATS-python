@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "components/form_macros.html" import render_hot_flag, render_status_badge %}
+{% from "components/form_macros.html" import render_hot_flag, render_status_badge, render_csrf %}
 
 {% block title %}{{ candidate.first_name }} {{ candidate.last_name }} - Candidates{% endblock %}
 

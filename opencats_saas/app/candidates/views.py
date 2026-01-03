@@ -290,6 +290,48 @@ def toggle_hot(id):
     return redirect(url_for('candidates.show', id=id))
 
 
+@candidates_bp.route('/<int:id>/add-to-job', methods=['POST'])
+@login_required
+@permission_required('candidates.edit')
+def add_to_job(id):
+    """Add candidate to job pipeline"""
+    candidate = Candidate.query_for_site(current_user.site_id).filter_by(candidate_id=id).first_or_404()
+
+    joborder_id = request.form.get('joborder_id', type=int)
+    status_code = request.form.get('status', type=int, default=100)
+
+    if not joborder_id:
+        flash('Please select a job order.', 'danger')
+        return redirect(url_for('candidates.show', id=id))
+
+    from app.models import JobOrder, PipelineEntry
+    joborder = JobOrder.query_for_site(current_user.site_id).filter_by(joborder_id=joborder_id).first_or_404()
+
+    # Check if already in pipeline
+    existing = PipelineEntry.query_for_site(current_user.site_id).filter_by(
+        candidate_id=candidate.candidate_id,
+        joborder_id=joborder_id
+    ).first()
+
+    if existing:
+        flash(f'Candidate is already in the pipeline for {joborder.title}.', 'warning')
+        return redirect(url_for('candidates.show', id=id))
+
+    # Create pipeline entry
+    pipeline_entry = PipelineEntry(
+        candidate_id=candidate.candidate_id,
+        joborder_id=joborder_id,
+        status_code=status_code,
+        site_id=current_user.site_id,
+        added_by=current_user.user_id
+    )
+    db.session.add(pipeline_entry)
+    db.session.commit()
+
+    flash(f'Added {candidate.full_name} to {joborder.title} pipeline.', 'success')
+    return redirect(url_for('candidates.show', id=id))
+
+
 @candidates_bp.route('/<int:id>/download-resume/<int:attachment_id>')
 @login_required
 @permission_required('candidates.view')
