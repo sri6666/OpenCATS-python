@@ -5,9 +5,10 @@ import os
 from datetime import timedelta
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables (skip if testing)
 basedir = os.path.abspath(os.path.dirname(__file__))
-load_dotenv(os.path.join(basedir, '.env'))
+if not os.environ.get('TESTING'):
+    load_dotenv(os.path.join(basedir, '.env'))
 
 
 class Config:
@@ -173,14 +174,18 @@ class TestingConfig(Config):
     TESTING = True
     DEBUG = True
 
-    # Use separate test database
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://cats:password@localhost/opencats_test'
+    # Use PostgreSQL for tests (production-ready, matches MySQL behavior)
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL') or \
+        'postgresql://postgres:postgres@localhost/opencats_test'
 
     # Disable CSRF for testing
     WTF_CSRF_ENABLED = False
 
     # Disable rate limiting
     RATELIMIT_ENABLED = False
+
+    # Disable Redis session for tests (use filesystem)
+    SESSION_TYPE = 'filesystem'
 
     # Faster password hashing for tests
     BCRYPT_LOG_ROUNDS = 4

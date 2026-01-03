@@ -22,29 +22,24 @@
 
     <div class="container-fluid">
         <div class="row">
+            <!-- Sidebar for authenticated users -->
             {% if current_user.is_authenticated %}
                 {% include 'components/sidebar.html' %}
-
-                <!-- Main Content -->
-                <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                    {% include 'components/flash_messages.html' %}
-
-                    <!-- Breadcrumb -->
-                    {% block breadcrumb %}{% endblock %}
-
-                    <!-- Page Header -->
-                    {% block page_header %}{% endblock %}
-
-                    <!-- Content -->
-                    {% block content %}{% endblock %}
-                </main>
-            {% else %}
-                <!-- Full Width for Public Pages -->
-                <main class="col-12">
-                    {% include 'components/flash_messages.html' %}
-                    {% block content %}{% endblock %}
-                </main>
             {% endif %}
+
+            <!-- Main Content -->
+            <main class="{% if current_user.is_authenticated %}col-md-9 ms-sm-auto col-lg-10{% else %}col-12{% endif %} px-md-4">
+                {% include 'components/flash_messages.html' %}
+
+                <!-- Breadcrumb -->
+                {% block breadcrumb %}{% endblock %}
+
+                <!-- Page Header -->
+                {% block page_header %}{% endblock %}
+
+                <!-- Content -->
+                {% block content %}{% endblock %}
+            </main>
         </div>
     </div>
 

@@ -4,7 +4,6 @@ Provides common test fixtures for OpenCATS testing
 """
 import pytest
 import os
-import tempfile
 from datetime import datetime
 from app import create_app
 from app.extensions import db
@@ -14,58 +13,48 @@ from app.models import Site, User, Candidate, JobOrder, Company, Contact
 @pytest.fixture(scope='session')
 def app():
     """Create application instance for testing"""
-    # Create temporary database file
-    db_fd, db_path = tempfile.mkstemp()
-
     # Set environment variable to prevent loading .env
     os.environ['TESTING'] = '1'
 
-    app = create_app()
-    app.config.update({
-        'TESTING': True,
-        'SQLALCHEMY_DATABASE_URI': f'sqlite:///{db_path}',
-        'SQLALCHEMY_TRACK_MODIFICATIONS': False,
-        'WTF_CSRF_ENABLED': False,  # Disable CSRF for testing
-        'SECRET_KEY': 'test-secret-key',
-        'MAIL_SUPPRESS_SEND': True,  # Don't actually send emails
-        'SERVER_NAME': 'localhost.localdomain',
-    })
+    # Create app with testing config (uses PostgreSQL from config)
+    app = create_app('testing')
+    app.config['SERVER_NAME'] = 'localhost.localdomain'
+
+    # Create all tables in test database
+    with app.app_context():
+        db.create_all()
 
     yield app
 
-    # Cleanup
-    os.close(db_fd)
-    os.unlink(db_path)
-
-
-@pytest.fixture(scope='session')
-def _db(app):
-    """Create database tables"""
+    # Drop all tables after test session (with CASCADE to handle circular dependencies)
     with app.app_context():
-        db.create_all()
+        db.session.remove()
+        db.session.execute(db.text('DROP SCHEMA public CASCADE'))
+        db.session.execute(db.text('CREATE SCHEMA public'))
+        db.session.commit()
+
+
+@pytest.fixture(scope='function')
+def _db(app):
+    """Provide clean database for each test"""
+    with app.app_context():
         yield db
-        db.drop_all()
+
+        # Clean up all tables after each test for isolation
+        # Use TRUNCATE with CASCADE to handle foreign key constraints
+        db.session.remove()
+        # Quote table names to handle reserved keywords like 'user'
+        table_names = ', '.join([f'"{table.name}"' for table in db.metadata.sorted_tables])
+        if table_names:
+            db.session.execute(db.text(f'TRUNCATE TABLE {table_names} RESTART IDENTITY CASCADE'))
+            db.session.commit()
 
 
 @pytest.fixture(scope='function')
 def db_session(app, _db):
     """Create a new database session for each test"""
     with app.app_context():
-        connection = _db.engine.connect()
-        transaction = connection.begin()
-
-        # Configure session to use test transaction
-        session = db.create_scoped_session(
-            options={'bind': connection, 'binds': {}}
-        )
-        _db.session = session
-
-        yield session
-
-        # Rollback transaction
-        transaction.rollback()
-        connection.close()
-        session.remove()
+        yield _db.session
 
 
 @pytest.fixture
