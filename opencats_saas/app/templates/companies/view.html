@@ -107,7 +107,7 @@
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-people"></i> Contacts ({{ contacts|length }})</h5>
-                <a href="{{ url_for('contacts.add', company_id=company.company_id) }}" class="btn btn-sm btn-primary">
+                <a href="{{ url_for('contacts.add', id=company.company_id) }}" class="btn btn-sm btn-primary">
                     <i class="bi bi-plus"></i> Add Contact
                 </a>
             </div>
@@ -128,7 +128,7 @@
                             {% for contact in contacts %}
                             <tr>
                                 <td>
-                                    <a href="{{ url_for('contacts.show', contact_id=contact.contact_id) }}">
+                                    <a href="{{ url_for('contacts.show', id=contact.contact_id) }}">
                                         {{ contact.first_name }} {{ contact.last_name }}
                                     </a>
                                     {% if contact.is_hot %}
@@ -139,7 +139,7 @@
                                 <td>{{ contact.email1 or '-' }}</td>
                                 <td>{{ contact.phone_work or contact.phone_cell or '-' }}</td>
                                 <td>
-                                    <a href="{{ url_for('contacts.show', contact_id=contact.contact_id) }}"
+                                    <a href="{{ url_for('contacts.show', id=contact.contact_id) }}"
                                        class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye"></i>
                                     </a>
@@ -159,7 +159,7 @@
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-briefcase"></i> Job Orders ({{ joborders|length }})</h5>
-                <a href="{{ url_for('joborders.add', company_id=company.company_id) }}" class="btn btn-sm btn-primary">
+                <a href="{{ url_for('joborders.add', id=company.company_id) }}" class="btn btn-sm btn-primary">
                     <i class="bi bi-plus"></i> Add Job Order
                 </a>
             </div>
@@ -181,7 +181,7 @@
                             {% for job in joborders %}
                             <tr>
                                 <td>
-                                    <a href="{{ url_for('joborders.show', joborder_id=job.joborder_id) }}">
+                                    <a href="{{ url_for('joborders.show', id=job.joborder_id) }}">
                                         {{ job.title }}
                                     </a>
                                     {% if job.is_hot %}
@@ -206,7 +206,7 @@
                                 </td>
                                 <td>{{ job.date_created.strftime('%Y-%m-%d') }}</td>
                                 <td>
-                                    <a href="{{ url_for('joborders.show', joborder_id=job.joborder_id) }}"
+                                    <a href="{{ url_for('joborders.show', id=job.joborder_id) }}"
                                        class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye"></i>
                                     </a>
@@ -285,7 +285,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form method="post" action="{{ url_for('companies.delete', company_id=company.company_id) }}" style="display: inline;">
+                <form method="post" action="{{ url_for('companies.delete', id=company.company_id) }}" style="display: inline;">
                     <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </div>
