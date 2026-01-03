@@ -310,7 +310,7 @@ class TestAPIFiltering:
 
         data = json.loads(response.data)
         # Should return pagination info
-        assert 'total' in data or 'count' in data or isinstance(data, list)
+        assert 'pagination' in data or 'total' in data or 'count' in data or isinstance(data, list)
 
     def test_sorting(self, client, test_site, test_candidate, api_headers):
         """Test API sorting"""

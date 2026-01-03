@@ -448,3 +448,40 @@ def create_pipeline_entry(current_user):
     db.session.commit()
 
     return jsonify(pipeline_entry_schema.dump(entry)), 201
+
+
+@api_bp.route('/pipeline/<int:id>', methods=['PUT'])
+@token_required
+def update_pipeline_entry(current_user, id):
+    """
+    Update pipeline entry status
+
+    PUT /api/v1/pipeline/123
+    {
+        "status": 600
+    }
+    """
+    entry = CandidateJobOrder.query_for_site(current_user.site_id).filter_by(candidate_joborder_id=id).first_or_404()
+
+    data = request.json
+    if not data or 'status' not in data:
+        return jsonify({'error': 'status is required'}), 400
+
+    old_status = entry.status
+    entry.status = data['status']
+
+    db.session.commit()
+
+    # Log activity
+    activity = Activity(
+        site_id=current_user.site_id,
+        data_item_id=entry.candidate_id,
+        data_item_type=100,  # Candidate
+        type=700,  # Pipeline Change
+        entered_by=current_user.user_id,
+        notes=f'Pipeline status changed from {old_status} to {data["status"]}'
+    )
+    db.session.add(activity)
+    db.session.commit()
+
+    return jsonify(pipeline_entry_schema.dump(entry)), 200
