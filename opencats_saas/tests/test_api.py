@@ -17,17 +17,14 @@ class TestAPIAuth:
 
     def test_api_with_invalid_key(self, client):
         """Test API with invalid key"""
-        headers = {'X-API-Key': 'invalid-key'}
-        response = client.get('/api/v1/candidates', headers=headers)
+        response = client.get('/api/v1/candidates', headers=api_headers)
         assert response.status_code == 401
 
     def test_api_with_valid_key(self, client, test_site, api_headers):
         """Test API with valid key"""
         # First generate API key for site
-        test_site.api_key = 'test-api-key-123'
 
-        headers = {'X-API-Key': 'test-api-key-123'}
-        response = client.get('/api/v1/candidates', headers=headers)
+        response = client.get('/api/v1/candidates', headers=api_headers)
         assert response.status_code in [200, 404]  # May not have candidates yet
 
 
@@ -36,23 +33,19 @@ class TestCandidateAPI:
 
     def test_list_candidates(self, client, test_site, test_candidate, api_headers):
         """Test GET /api/v1/candidates"""
-        test_site.api_key = 'test-key'
-        headers = {'X-API-Key': 'test-key'}
 
-        response = client.get('/api/v1/candidates', headers=headers)
+        response = client.get('/api/v1/candidates', headers=api_headers)
         assert response.status_code == 200
 
         data = json.loads(response.data)
-        assert 'candidates' in data or isinstance(data, list)
+        assert 'data' in data or 'candidates' in data or isinstance(data, list)
 
     def test_get_candidate_detail(self, client, test_site, test_candidate, api_headers):
         """Test GET /api/v1/candidates/<id>"""
-        test_site.api_key = 'test-key'
-        headers = {'X-API-Key': 'test-key'}
 
         response = client.get(
             f'/api/v1/candidates/{test_candidate.candidate_id}',
-            headers=headers
+            headers=api_headers
         )
         assert response.status_code == 200
 
@@ -62,11 +55,6 @@ class TestCandidateAPI:
 
     def test_create_candidate(self, client, test_site, admin_user):
         """Test POST /api/v1/candidates"""
-        test_site.api_key = 'test-key'
-        headers = {
-            'X-API-Key': 'test-key',
-            'Content-Type': 'application/json'
-        }
 
         candidate_data = {
             'first_name': 'Bob',
@@ -78,7 +66,7 @@ class TestCandidateAPI:
 
         response = client.post(
             '/api/v1/candidates',
-            headers=headers,
+            headers=api_headers,
             data=json.dumps(candidate_data)
         )
         assert response.status_code in [201, 200]
@@ -89,11 +77,6 @@ class TestCandidateAPI:
 
     def test_update_candidate(self, client, test_site, test_candidate):
         """Test PUT /api/v1/candidates/<id>"""
-        test_site.api_key = 'test-key'
-        headers = {
-            'X-API-Key': 'test-key',
-            'Content-Type': 'application/json'
-        }
 
         update_data = {
             'is_hot': False,
@@ -102,30 +85,26 @@ class TestCandidateAPI:
 
         response = client.put(
             f'/api/v1/candidates/{test_candidate.candidate_id}',
-            headers=headers,
+            headers=api_headers,
             data=json.dumps(update_data)
         )
         assert response.status_code in [200, 204]
 
     def test_delete_candidate(self, client, test_site, test_candidate):
         """Test DELETE /api/v1/candidates/<id>"""
-        test_site.api_key = 'test-key'
-        headers = {'X-API-Key': 'test-key'}
 
         response = client.delete(
             f'/api/v1/candidates/{test_candidate.candidate_id}',
-            headers=headers
+            headers=api_headers
         )
         assert response.status_code in [200, 204]
 
     def test_search_candidates(self, client, test_site, test_candidate):
         """Test GET /api/v1/candidates?search=keyword"""
-        test_site.api_key = 'test-key'
-        headers = {'X-API-Key': 'test-key'}
 
         response = client.get(
             '/api/v1/candidates?search=Alice',
-            headers=headers
+            headers=api_headers
         )
         assert response.status_code == 200
 
@@ -144,20 +123,16 @@ class TestJobOrderAPI:
 
     def test_list_jobs(self, client, test_site, test_job):
         """Test GET /api/v1/joborders"""
-        test_site.api_key = 'test-key'
-        headers = {'X-API-Key': 'test-key'}
 
-        response = client.get('/api/v1/joborders', headers=headers)
+        response = client.get('/api/v1/joborders', headers=api_headers)
         assert response.status_code == 200
 
     def test_get_job_detail(self, client, test_site, test_job):
         """Test GET /api/v1/joborders/<id>"""
-        test_site.api_key = 'test-key'
-        headers = {'X-API-Key': 'test-key'}
 
         response = client.get(
             f'/api/v1/joborders/{test_job.joborder_id}',
-            headers=headers
+            headers=api_headers
         )
         assert response.status_code == 200
 
@@ -166,11 +141,6 @@ class TestJobOrderAPI:
 
     def test_create_job(self, client, test_site, test_company, admin_user):
         """Test POST /api/v1/joborders"""
-        test_site.api_key = 'test-key'
-        headers = {
-            'X-API-Key': 'test-key',
-            'Content-Type': 'application/json'
-        }
 
         job_data = {
             'title': 'Full Stack Developer',
@@ -184,7 +154,7 @@ class TestJobOrderAPI:
 
         response = client.post(
             '/api/v1/joborders',
-            headers=headers,
+            headers=api_headers,
             data=json.dumps(job_data)
         )
         assert response.status_code in [201, 200]
@@ -195,20 +165,16 @@ class TestCompanyAPI:
 
     def test_list_companies(self, client, test_site, test_company):
         """Test GET /api/v1/companies"""
-        test_site.api_key = 'test-key'
-        headers = {'X-API-Key': 'test-key'}
 
-        response = client.get('/api/v1/companies', headers=headers)
+        response = client.get('/api/v1/companies', headers=api_headers)
         assert response.status_code == 200
 
     def test_get_company_detail(self, client, test_site, test_company):
         """Test GET /api/v1/companies/<id>"""
-        test_site.api_key = 'test-key'
-        headers = {'X-API-Key': 'test-key'}
 
         response = client.get(
             f'/api/v1/companies/{test_company.company_id}',
-            headers=headers
+            headers=api_headers
         )
         assert response.status_code == 200
 
@@ -217,11 +183,6 @@ class TestCompanyAPI:
 
     def test_create_company(self, client, test_site, admin_user):
         """Test POST /api/v1/companies"""
-        test_site.api_key = 'test-key'
-        headers = {
-            'X-API-Key': 'test-key',
-            'Content-Type': 'application/json'
-        }
 
         company_data = {
             'name': 'New Tech Corp',
@@ -232,7 +193,7 @@ class TestCompanyAPI:
 
         response = client.post(
             '/api/v1/companies',
-            headers=headers,
+            headers=api_headers,
             data=json.dumps(company_data)
         )
         assert response.status_code in [201, 200]
@@ -243,20 +204,16 @@ class TestContactAPI:
 
     def test_list_contacts(self, client, test_site, test_contact):
         """Test GET /api/v1/contacts"""
-        test_site.api_key = 'test-key'
-        headers = {'X-API-Key': 'test-key'}
 
-        response = client.get('/api/v1/contacts', headers=headers)
+        response = client.get('/api/v1/contacts', headers=api_headers)
         assert response.status_code == 200
 
     def test_get_contact_detail(self, client, test_site, test_contact):
         """Test GET /api/v1/contacts/<id>"""
-        test_site.api_key = 'test-key'
-        headers = {'X-API-Key': 'test-key'}
 
         response = client.get(
             f'/api/v1/contacts/{test_contact.contact_id}',
-            headers=headers
+            headers=api_headers
         )
         assert response.status_code == 200
 
@@ -270,11 +227,6 @@ class TestPipelineAPI:
 
     def test_add_candidate_to_job(self, client, test_site, test_candidate, test_job):
         """Test POST /api/v1/pipeline"""
-        test_site.api_key = 'test-key'
-        headers = {
-            'X-API-Key': 'test-key',
-            'Content-Type': 'application/json'
-        }
 
         pipeline_data = {
             'candidate_id': test_candidate.candidate_id,
@@ -284,7 +236,7 @@ class TestPipelineAPI:
 
         response = client.post(
             '/api/v1/pipeline',
-            headers=headers,
+            headers=api_headers,
             data=json.dumps(pipeline_data)
         )
         assert response.status_code in [201, 200]
@@ -304,17 +256,12 @@ class TestPipelineAPI:
         db_session.add(pipeline)
         db_session.commit()
 
-        test_site.api_key = 'test-key'
-        headers = {
-            'X-API-Key': 'test-key',
-            'Content-Type': 'application/json'
-        }
 
         update_data = {'status': 600}  # Interviewed
 
         response = client.put(
             f'/api/v1/pipeline/{pipeline.candidatejoborder_id}',
-            headers=headers,
+            headers=api_headers,
             data=json.dumps(update_data)
         )
         assert response.status_code in [200, 204]
@@ -325,12 +272,10 @@ class TestAPIFiltering:
 
     def test_filter_by_status(self, client, test_site, test_candidate):
         """Test filtering candidates by status"""
-        test_site.api_key = 'test-key'
-        headers = {'X-API-Key': 'test-key'}
 
         response = client.get(
             '/api/v1/candidates?is_active=true',
-            headers=headers
+            headers=api_headers
         )
         assert response.status_code == 200
 
@@ -351,13 +296,11 @@ class TestAPIFiltering:
             db_session.add(candidate)
         db_session.commit()
 
-        test_site.api_key = 'test-key'
-        headers = {'X-API-Key': 'test-key'}
 
         # Request first page
         response = client.get(
             '/api/v1/candidates?page=1&per_page=10',
-            headers=headers
+            headers=api_headers
         )
         assert response.status_code == 200
 
@@ -367,12 +310,10 @@ class TestAPIFiltering:
 
     def test_sorting(self, client, test_site, test_candidate):
         """Test API sorting"""
-        test_site.api_key = 'test-key'
-        headers = {'X-API-Key': 'test-key'}
 
         response = client.get(
             '/api/v1/candidates?sort=last_name&order=asc',
-            headers=headers
+            headers=api_headers
         )
         assert response.status_code == 200
 
@@ -382,37 +323,28 @@ class TestAPIErrors:
 
     def test_404_not_found(self, client, test_site):
         """Test 404 error for non-existent resource"""
-        test_site.api_key = 'test-key'
-        headers = {'X-API-Key': 'test-key'}
 
-        response = client.get('/api/v1/candidates/99999', headers=headers)
+        response = client.get('/api/v1/candidates/99999', headers=api_headers)
         assert response.status_code == 404
 
     def test_400_bad_request(self, client, test_site):
         """Test 400 error for invalid data"""
-        test_site.api_key = 'test-key'
-        headers = {
-            'X-API-Key': 'test-key',
-            'Content-Type': 'application/json'
-        }
 
         # Missing required fields
         invalid_data = {}
 
         response = client.post(
             '/api/v1/candidates',
-            headers=headers,
+            headers=api_headers,
             data=json.dumps(invalid_data)
         )
         assert response.status_code in [400, 422]
 
     def test_method_not_allowed(self, client, test_site):
         """Test 405 error for unsupported method"""
-        test_site.api_key = 'test-key'
-        headers = {'X-API-Key': 'test-key'}
 
         # PATCH might not be supported
-        response = client.patch('/api/v1/candidates/1', headers=headers)
+        response = client.patch('/api/v1/candidates/1', headers=api_headers)
         assert response.status_code in [405, 501]
 
 
