@@ -52,4 +52,4 @@ celery_app = Celery(
 def load_user(user_id):
     """Load user by ID for Flask-Login"""
     from app.models import User
-    return User.query.get(int(user_id))
+    return User.query.filter_by(user_id=int(user_id)).first()

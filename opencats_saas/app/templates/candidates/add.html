@@ -118,14 +118,7 @@
                     <i class="bi bi-flag me-2"></i>Status
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            {{ render_field(form.is_hot, label_visible=false) }}
-                        </div>
-                        <div class="col-md-4">
-                            {{ render_field(form.is_active, label_visible=false) }}
-                        </div>
-                    </div>
+                    {{ render_field(form.is_hot, label_visible=false) }}
                     {{ render_field(form.source) }}
                 </div>
             </div>

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Subscription Plans - {{ current_user.site.name }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">Subscription Plans</h1>
+        {% if current_plan %}
+        <p class="text-muted">Current plan: <strong>{{ current_plan.name }}</strong></p>
+        {% endif %}
+    </div>
+    {% if current_user.site.stripe_customer_id %}
+    <div>
+        <a href="{{ url_for('billing.customer_portal') }}" class="btn btn-outline-primary">
+            <i class="bi bi-gear me-2"></i>Manage Subscription
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+{% if trial_days_left is not none and trial_days_left > 0 %}
+<div class="alert alert-info mb-4">
+    <i class="bi bi-info-circle me-2"></i>
+    You have <strong>{{ trial_days_left }} day{{ 's' if trial_days_left != 1 else '' }}</strong> remaining in your trial period.
+</div>
+{% endif %}
+
+<div class="row">
+    {% for plan in plans %}
+    <div class="col-md-4 mb-4">
+        <div class="card {% if current_plan and current_plan.stripe_price_id == plan.stripe_price_id %}border-primary{% endif %}">
+            <div class="card-header text-center {% if current_plan and current_plan.stripe_price_id == plan.stripe_price_id %}bg-primary text-white{% endif %}">
+                <h3 class="h4 mb-0">{{ plan.name }}</h3>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <h2 class="display-4">${{ plan.price }}</h2>
+                    <p class="text-muted">per month</p>
+                </div>
+
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <strong>{{ plan.max_users }}</strong> user{{ 's' if plan.max_users != 1 else '' }}
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <strong>{{ plan.max_candidates }}</strong> candidate{{ 's' if plan.max_candidates != 1 else '' }}
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <strong>{{ plan.max_jobs }}</strong> job{{ 's' if plan.max_jobs != 1 else '' }}
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        <strong>{{ plan.max_storage_gb }}</strong> GB storage
+                    </li>
+                    {% if plan.features %}
+                    {% for feature in plan.features %}
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        {{ feature }}
+                    </li>
+                    {% endfor %}
+                    {% endif %}
+                </ul>
+
+                <div class="d-grid gap-2 mt-4">
+                    {% if current_plan and current_plan.stripe_price_id == plan.stripe_price_id %}
+                    <button class="btn btn-primary" disabled>Current Plan</button>
+                    {% else %}
+                    <a href="{{ url_for('billing.checkout', price_id=plan.stripe_price_id) }}" class="btn btn-outline-primary">
+                        {% if current_plan and plan.price > current_plan.price %}
+                        Upgrade to {{ plan.name }}
+                        {% elif current_plan and plan.price < current_plan.price %}
+                        Downgrade to {{ plan.name }}
+                        {% else %}
+                        Select {{ plan.name }}
+                        {% endif %}
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="card-title">Questions about plans?</h5>
+        <p class="card-text">Contact our sales team if you need a custom plan or have specific requirements.</p>
+        <a href="mailto:sales@opencats.org" class="btn btn-outline-secondary">
+            <i class="bi bi-envelope me-2"></i>Contact Sales
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}All Tenants - Root Admin - {{ current_user.site.name }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">All Tenants</h1>
+        <p class="text-muted">Root admin view - Total MRR: ${{ total_revenue }}</p>
+    </div>
+    <div>
+        <a href="{{ url_for('admin.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Back to Admin
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="status" class="form-label">Status</label>
+                <select name="status" id="status" class="form-select">
+                    <option value="">All Sites</option>
+                    <option value="active" {% if request.args.get('status') == 'active' %}selected{% endif %}>Active</option>
+                    <option value="trial" {% if request.args.get('status') == 'trial' %}selected{% endif %}>Trial</option>
+                    <option value="canceled" {% if request.args.get('status') == 'canceled' %}selected{% endif %}>Canceled</option>
+                    <option value="past_due" {% if request.args.get('status') == 'past_due' %}selected{% endif %}>Past Due</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="sort" class="form-label">Sort By</label>
+                <select name="sort" id="sort" class="form-select">
+                    <option value="date_created" {% if request.args.get('sort') == 'date_created' %}selected{% endif %}>Date Created</option>
+                    <option value="name" {% if request.args.get('sort') == 'name' %}selected{% endif %}>Name</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-funnel me-2"></i>Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tenants Table -->
+<div class="card">
+    <div class="card-body">
+        {% if sites %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Subdomain</th>
+                        <th>Plan</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Users</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for site in sites %}
+                    <tr>
+                        <td>{{ site.site_id }}</td>
+                        <td>{{ site.name }}</td>
+                        <td>
+                            <code>{{ site.subdomain }}</code>
+                        </td>
+                        <td>{{ site.subscription_plan or 'None' }}</td>
+                        <td>
+                            <span class="badge {% if site.subscription_status == 'active' %}bg-success{% elif site.subscription_status == 'trial' %}bg-warning{% else %}bg-danger{% endif %}">
+                                {{ site.subscription_status or 'Unknown' }}
+                            </span>
+                        </td>
+                        <td>{{ site.date_created.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            {% set user_count = site.users.filter_by(is_active=True).count() if site.users else 0 %}
+                            {{ user_count }}
+                        </td>
+                        <td>
+                            <form method="post" action="{{ url_for('admin.impersonate_tenant', site_id=site.site_id) }}" style="display: inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-sm btn-outline-primary" title="Impersonate">
+                                    <i class="bi bi-box-arrow-in-right"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if pagination.pages > 1 %}
+        <nav aria-label="Tenant pagination">
+            <ul class="pagination justify-content-center">
+                {% if pagination.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin.all_tenants', page=pagination.prev_num, status=request.args.get('status'), sort=request.args.get('sort')) }}">Previous</a>
+                </li>
+                {% endif %}
+
+                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('admin.all_tenants', page=page_num, status=request.args.get('status'), sort=request.args.get('sort')) }}">{{ page_num }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagination.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin.all_tenants', page=pagination.next_num, status=request.args.get('status'), sort=request.args.get('sort')) }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>No tenants found.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

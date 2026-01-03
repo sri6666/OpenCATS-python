@@ -20,7 +20,7 @@ def index():
     site_id = current_user.site_id
 
     # Get site information
-    site = Site.query.get(site_id)
+    site = Site.query.filter_by(site_id=site_id).first_or_404()
 
     # Usage statistics
     stats = {
@@ -92,7 +92,7 @@ def users():
 @admin_required
 def toggle_user_status(user_id):
     """Enable/disable user"""
-    user = User.query_for_site(current_user.site_id).get_or_404(user_id)
+    user = User.query_for_site(current_user.site_id).filter_by(user_id=user_id).first_or_404()
 
     # Can't disable yourself
     if user.user_id == current_user.user_id:
@@ -113,7 +113,7 @@ def toggle_user_status(user_id):
 @admin_required
 def change_user_access(user_id):
     """Change user access level"""
-    user = User.query_for_site(current_user.site_id).get_or_404(user_id)
+    user = User.query_for_site(current_user.site_id).filter_by(user_id=user_id).first_or_404()
 
     new_level = request.form.get('access_level', type=int)
 
@@ -145,7 +145,7 @@ def change_user_access(user_id):
 @admin_required
 def billing():
     """Billing and subscription management"""
-    site = Site.query.get(current_user.site_id)
+    site = Site.query.filter_by(site_id=current_user.site_id).first_or_404()
 
     # Get current plan
     from config import Config
@@ -173,7 +173,7 @@ def billing():
 @admin_required
 def settings():
     """Site settings"""
-    site = Site.query.get(current_user.site_id)
+    site = Site.query.filter_by(site_id=current_user.site_id).first_or_404()
 
     return render_template('admin/settings.html', site=site)
 
@@ -183,7 +183,7 @@ def settings():
 @admin_required
 def update_settings():
     """Update site settings"""
-    site = Site.query.get(current_user.site_id)
+    site = Site.query.filter_by(site_id=current_user.site_id).first_or_404()
 
     site.name = request.form.get('site_name', site.name)
     site.timezone = request.form.get('timezone', site.timezone)
@@ -283,7 +283,7 @@ def all_tenants():
 @root_required
 def impersonate_tenant(site_id):
     """Impersonate a tenant (root only)"""
-    site = Site.query.get_or_404(site_id)
+    site = Site.query.filter_by(site_id=site_id).first_or_404()
 
     # Get or create admin user for this site
     admin_user = User.query.filter_by(site_id=site_id, access_level=500).first()

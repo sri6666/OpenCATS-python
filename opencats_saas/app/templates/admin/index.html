@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - {{ current_user.site.name }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">Admin Dashboard</h1>
+        <p class="text-muted">Site management and usage overview</p>
+    </div>
+    {% if trial_days_left is not none %}
+    <div>
+        <span class="badge bg-warning">Trial: {{ trial_days_left }} days left</span>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Usage Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Active Users</h6>
+                        <h3 class="mb-0">{{ stats.users }}</h3>
+                        {% if limits.max_users and limits.max_users != -1 %}
+                        <small class="text-muted">/ {{ limits.max_users }} max</small>
+                        {% endif %}
+                    </div>
+                    <div class="text-primary">
+                        <i class="bi bi-people" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+                {% if usage.users > 0 %}
+                <div class="progress mt-2" style="height: 5px;">
+                    <div class="progress-bar {% if usage.users >= 90 %}bg-danger{% elif usage.users >= 75 %}bg-warning{% else %}bg-primary{% endif %}"
+                         style="width: {{ usage.users }}%"></div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Candidates</h6>
+                        <h3 class="mb-0">{{ stats.candidates }}</h3>
+                        {% if limits.max_candidates and limits.max_candidates != -1 %}
+                        <small class="text-muted">/ {{ limits.max_candidates }} max</small>
+                        {% endif %}
+                    </div>
+                    <div class="text-success">
+                        <i class="bi bi-person-badge" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+                {% if usage.candidates > 0 %}
+                <div class="progress mt-2" style="height: 5px;">
+                    <div class="progress-bar {% if usage.candidates >= 90 %}bg-danger{% elif usage.candidates >= 75 %}bg-warning{% else %}bg-success{% endif %}"
+                         style="width: {{ usage.candidates }}%"></div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Job Orders</h6>
+                        <h3 class="mb-0">{{ stats.jobs }}</h3>
+                        {% if limits.max_jobs and limits.max_jobs != -1 %}
+                        <small class="text-muted">/ {{ limits.max_jobs }} max</small>
+                        {% endif %}
+                    </div>
+                    <div class="text-info">
+                        <i class="bi bi-briefcase" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+                {% if usage.jobs > 0 %}
+                <div class="progress mt-2" style="height: 5px;">
+                    <div class="progress-bar {% if usage.jobs >= 90 %}bg-danger{% elif usage.jobs >= 75 %}bg-warning{% else %}bg-info{% endif %}"
+                         style="width: {{ usage.jobs }}%"></div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Storage</h6>
+                        <h3 class="mb-0">{{ "%.1f"|format(stats.storage_used_mb / 1024) }} GB</h3>
+                        {% if limits.storage_gb %}
+                        <small class="text-muted">/ {{ limits.storage_gb }} GB</small>
+                        {% endif %}
+                    </div>
+                    <div class="text-warning">
+                        <i class="bi bi-hdd" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+                {% if usage.storage > 0 %}
+                <div class="progress mt-2" style="height: 5px;">
+                    <div class="progress-bar {% if usage.storage >= 90 %}bg-danger{% elif usage.storage >= 75 %}bg-warning{% else %}bg-warning{% endif %}"
+                         style="width: {{ usage.storage }}%"></div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-speedometer2 me-2"></i>Quick Actions
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('admin.users') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-people me-2"></i>Manage Users
+                    </a>
+                    <a href="{{ url_for('admin.billing') }}" class="btn btn-outline-success">
+                        <i class="bi bi-credit-card me-2"></i>Billing & Subscription
+                    </a>
+                    <a href="{{ url_for('admin.settings') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-gear me-2"></i>Site Settings
+                    </a>
+                    <a href="{{ url_for('admin.analytics') }}" class="btn btn-outline-info">
+                        <i class="bi bi-bar-chart me-2"></i>Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clock-history me-2"></i>Recent Users
+            </div>
+            <div class="card-body">
+                {% if recent_users %}
+                <div class="list-group list-group-flush">
+                    {% for user in recent_users %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+                                <br>
+                                <small class="text-muted">{{ user.username }}</small>
+                            </div>
+                            <small class="text-muted">
+                                {{ user.date_created.strftime('%Y-%m-%d') }}
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">No recent users</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Subscription Info -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-info-circle me-2"></i>Subscription Information
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <strong>Current Plan:</strong> {{ site.subscription_plan or 'None' }}
+            </div>
+            <div class="col-md-4">
+                <strong>Status:</strong>
+                <span class="badge {% if site.subscription_status == 'active' %}bg-success{% elif site.subscription_status == 'trial' %}bg-warning{% else %}bg-danger{% endif %}">
+                    {{ site.subscription_status or 'Unknown' }}
+                </span>
+            </div>
+            <div class="col-md-4">
+                {% if trial_days_left is not none %}
+                <strong>Trial Ends:</strong> {{ trial_days_left }} days
+                {% endif %}
+            </div>
+        </div>
+        <div class="mt-3">
+            <a href="{{ url_for('admin.billing') }}" class="btn btn-primary">
+                <i class="bi bi-credit-card me-2"></i>Manage Subscription
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Billing & Subscription - Admin - {{ current_user.site.name }}{% endblock %}
+
+{% block page_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2">Billing & Subscription</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}">Admin</a></li>
+                <li class="breadcrumb-item active">Billing</li>
+            </ol>
+        </nav>
+    </div>
+    {% if site.stripe_customer_id %}
+    <div>
+        <a href="{{ url_for('billing.customer_portal') }}" class="btn btn-primary">
+            <i class="bi bi-credit-card me-2"></i>Manage in Stripe
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Current Plan -->
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-info-circle me-2"></i>Current Subscription
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h4>{{ current_plan.name if current_plan else 'No Plan' }}</h4>
+                <p class="text-muted">{{ current_plan.description if current_plan else 'No active subscription' }}</p>
+
+                {% if site.subscription_status %}
+                <p>
+                    <strong>Status:</strong>
+                    <span class="badge {% if site.subscription_status == 'active' %}bg-success{% elif site.subscription_status == 'trial' %}bg-warning{% else %}bg-danger{% endif %}">
+                        {{ site.subscription_status }}
+                    </span>
+                </p>
+                {% endif %}
+
+                {% if trial_days_left is not none %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-clock me-2"></i>
+                    <strong>Trial Period:</strong> {{ trial_days_left }} day{{ 's' if trial_days_left != 1 else '' }} remaining
+                </div>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h2 class="display-4">${{ monthly_cost }}</h2>
+                        <p class="text-muted">per month</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Available Plans -->
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-list-check me-2"></i>Available Plans
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for plan_key, plan in all_plans.items() %}
+            <div class="col-md-4 mb-3">
+                <div class="card {% if site.subscription_plan == plan_key %}border-primary{% endif %}">
+                    <div class="card-header {% if site.subscription_plan == plan_key %}bg-primary text-white{% endif %}">
+                        <h5 class="mb-0">{{ plan.name }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <h3>${{ plan.price }}<small class="text-muted">/mo</small></h3>
+                        <ul class="list-unstyled mt-3">
+                            <li><i class="bi bi-check text-success"></i> {{ plan.features.max_users }} users</li>
+                            <li><i class="bi bi-check text-success"></i> {{ plan.features.max_candidates }} candidates</li>
+                            <li><i class="bi bi-check text-success"></i> {{ plan.features.max_jobs }} jobs</li>
+                            <li><i class="bi bi-check text-success"></i> {{ plan.features.storage_gb }} GB storage</li>
+                        </ul>
+                        {% if site.subscription_plan == plan_key %}
+                        <button class="btn btn-primary w-100" disabled>Current Plan</button>
+                        {% else %}
+                        <a href="{{ url_for('billing.checkout', price_id=plan.stripe_price_id) }}" class="btn btn-outline-primary w-100">
+                            Select Plan
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Billing History -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-clock-history me-2"></i>Billing History
+    </div>
+    <div class="card-body">
+        {% if site.stripe_customer_id %}
+        <p class="text-muted">View your complete billing history in the <a href="{{ url_for('billing.customer_portal') }}">Stripe Customer Portal</a>.</p>
+        {% else %}
+        <p class="text-muted">No billing history available. Subscribe to a plan to get started.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
