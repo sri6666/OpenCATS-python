@@ -107,7 +107,7 @@ def get_job(current_user, id):
 
     Returns full job details including pipeline
     """
-    job = JobOrder.query_for_site(current_user.site_id).get_or_404(id)
+    job = JobOrder.query_for_site(current_user.site_id).filter_by(joborder_id=id).first_or_404()
 
     if job.is_admin_hidden:
         return jsonify({'error': 'Job not found'}), 404
@@ -211,7 +211,7 @@ def update_job(current_user, id):
         "notes": "Put on hold pending budget approval"
     }
     """
-    job = JobOrder.query_for_site(current_user.site_id).get_or_404(id)
+    job = JobOrder.query_for_site(current_user.site_id).filter_by(joborder_id=id).first_or_404()
 
     if job.is_admin_hidden:
         return jsonify({'error': 'Job not found'}), 404
@@ -253,7 +253,7 @@ def delete_job(current_user, id):
 
     DELETE /api/v1/jobs/123
     """
-    job = JobOrder.query_for_site(current_user.site_id).get_or_404(id)
+    job = JobOrder.query_for_site(current_user.site_id).filter_by(joborder_id=id).first_or_404()
 
     if job.is_admin_hidden:
         return jsonify({'error': 'Job not found'}), 404
@@ -290,7 +290,7 @@ def get_job_pipeline(current_user, id):
     Query params:
     - status: Filter by pipeline status (0, 200, 250, 300, 400, 500, 600, 800)
     """
-    job = JobOrder.query_for_site(current_user.site_id).get_or_404(id)
+    job = JobOrder.query_for_site(current_user.site_id).filter_by(joborder_id=id).first_or_404()
 
     if job.is_admin_hidden:
         return jsonify({'error': 'Job not found'}), 404
@@ -362,8 +362,8 @@ def update_pipeline_status(current_user, id, entry_id):
         "notes": "Submitted to hiring manager"
     }
     """
-    job = JobOrder.query_for_site(current_user.site_id).get_or_404(id)
-    entry = CandidateJobOrder.query_for_site(current_user.site_id).get_or_404(entry_id)
+    job = JobOrder.query_for_site(current_user.site_id).filter_by(joborder_id=id).first_or_404()
+    entry = CandidateJobOrder.query_for_site(current_user.site_id).filter_by(candidate_joborder_id=entry_id).first_or_404()
 
     if entry.joborder_id != id:
         return jsonify({'error': 'Pipeline entry does not belong to this job'}), 400
@@ -412,7 +412,7 @@ def get_job_activities(current_user, id):
 
     GET /api/v1/jobs/123/activities
     """
-    job = JobOrder.query_for_site(current_user.site_id).get_or_404(id)
+    job = JobOrder.query_for_site(current_user.site_id).filter_by(joborder_id=id).first_or_404()
 
     if job.is_admin_hidden:
         return jsonify({'error': 'Job not found'}), 404

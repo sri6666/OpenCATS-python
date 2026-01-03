@@ -96,7 +96,7 @@ def get_candidate(current_user, id):
 
     Returns full candidate details including attachments and activities
     """
-    candidate = Candidate.query_for_site(current_user.site_id).get_or_404(id)
+    candidate = Candidate.query_for_site(current_user.site_id).filter_by(candidate_id=id).first_or_404()
 
     if candidate.is_admin_hidden:
         return jsonify({'error': 'Candidate not found'}), 404
@@ -192,7 +192,7 @@ def update_candidate(current_user, id):
         "key_skills": "Python, Flask, SQL, Docker"
     }
     """
-    candidate = Candidate.query_for_site(current_user.site_id).get_or_404(id)
+    candidate = Candidate.query_for_site(current_user.site_id).filter_by(candidate_id=id).first_or_404()
 
     if candidate.is_admin_hidden:
         return jsonify({'error': 'Candidate not found'}), 404
@@ -234,7 +234,7 @@ def delete_candidate(current_user, id):
 
     DELETE /api/v1/candidates/123
     """
-    candidate = Candidate.query_for_site(current_user.site_id).get_or_404(id)
+    candidate = Candidate.query_for_site(current_user.site_id).filter_by(candidate_id=id).first_or_404()
 
     if candidate.is_admin_hidden:
         return jsonify({'error': 'Candidate not found'}), 404
@@ -270,7 +270,7 @@ def get_candidate_pipeline(current_user, id):
 
     Returns all jobs the candidate is associated with and their status
     """
-    candidate = Candidate.query_for_site(current_user.site_id).get_or_404(id)
+    candidate = Candidate.query_for_site(current_user.site_id).filter_by(candidate_id=id).first_or_404()
 
     if candidate.is_admin_hidden:
         return jsonify({'error': 'Candidate not found'}), 404
@@ -301,7 +301,7 @@ def add_candidate_to_job(current_user, id):
         "status": 200
     }
     """
-    candidate = Candidate.query_for_site(current_user.site_id).get_or_404(id)
+    candidate = Candidate.query_for_site(current_user.site_id).filter_by(candidate_id=id).first_or_404()
 
     if candidate.is_admin_hidden:
         return jsonify({'error': 'Candidate not found'}), 404
@@ -357,7 +357,7 @@ def get_candidate_activities(current_user, id):
 
     GET /api/v1/candidates/123/activities
     """
-    candidate = Candidate.query_for_site(current_user.site_id).get_or_404(id)
+    candidate = Candidate.query_for_site(current_user.site_id).filter_by(candidate_id=id).first_or_404()
 
     if candidate.is_admin_hidden:
         return jsonify({'error': 'Candidate not found'}), 404

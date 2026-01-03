@@ -91,7 +91,7 @@ def get_contact(current_user, id):
 
     GET /api/v1/contacts/123
     """
-    contact = Contact.query_for_site(current_user.site_id).get_or_404(id)
+    contact = Contact.query_for_site(current_user.site_id).filter_by(contact_id=id).first_or_404()
 
     if contact.is_admin_hidden:
         return jsonify({'error': 'Contact not found'}), 404
@@ -198,7 +198,7 @@ def update_contact(current_user, id):
         "phone_work": "555-5678"
     }
     """
-    contact = Contact.query_for_site(current_user.site_id).get_or_404(id)
+    contact = Contact.query_for_site(current_user.site_id).filter_by(contact_id=id).first_or_404()
 
     if contact.is_admin_hidden:
         return jsonify({'error': 'Contact not found'}), 404
@@ -240,7 +240,7 @@ def delete_contact(current_user, id):
 
     DELETE /api/v1/contacts/123
     """
-    contact = Contact.query_for_site(current_user.site_id).get_or_404(id)
+    contact = Contact.query_for_site(current_user.site_id).filter_by(contact_id=id).first_or_404()
 
     if contact.is_admin_hidden:
         return jsonify({'error': 'Contact not found'}), 404
@@ -274,7 +274,7 @@ def mark_left_company(current_user, id):
 
     POST /api/v1/contacts/123/mark-left-company
     """
-    contact = Contact.query_for_site(current_user.site_id).get_or_404(id)
+    contact = Contact.query_for_site(current_user.site_id).filter_by(contact_id=id).first_or_404()
 
     if contact.is_admin_hidden:
         return jsonify({'error': 'Contact not found'}), 404

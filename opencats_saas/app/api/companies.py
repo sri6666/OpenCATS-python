@@ -84,7 +84,7 @@ def get_company(current_user, id):
 
     Returns company with contacts and job orders
     """
-    company = Company.query_for_site(current_user.site_id).get_or_404(id)
+    company = Company.query_for_site(current_user.site_id).filter_by(company_id=id).first_or_404()
 
     if company.is_admin_hidden:
         return jsonify({'error': 'Company not found'}), 404
@@ -196,7 +196,7 @@ def update_company(current_user, id):
         "notes": "Updated contact information"
     }
     """
-    company = Company.query_for_site(current_user.site_id).get_or_404(id)
+    company = Company.query_for_site(current_user.site_id).filter_by(company_id=id).first_or_404()
 
     if company.is_admin_hidden:
         return jsonify({'error': 'Company not found'}), 404
@@ -238,7 +238,7 @@ def delete_company(current_user, id):
 
     DELETE /api/v1/companies/123
     """
-    company = Company.query_for_site(current_user.site_id).get_or_404(id)
+    company = Company.query_for_site(current_user.site_id).filter_by(company_id=id).first_or_404()
 
     if company.is_admin_hidden:
         return jsonify({'error': 'Company not found'}), 404
