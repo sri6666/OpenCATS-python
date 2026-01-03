@@ -22,7 +22,7 @@ def get_contacts(current_user):
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 20, type=int), 100)
 
-    query = Contact.query_for_site(current_user.site_id).filter_by(is_admin_hidden=False)
+    query = Contact.query_for_site(current_user.site_id)
 
     # Company filter
     company_id = request.args.get('company_id', type=int)
@@ -93,9 +93,6 @@ def get_contact(current_user, id):
     """
     contact = Contact.query_for_site(current_user.site_id).filter_by(contact_id=id).first_or_404()
 
-    if contact.is_admin_hidden:
-        return jsonify({'error': 'Contact not found'}), 404
-
     data = contact_schema.dump(contact)
 
     # Add company info
@@ -111,7 +108,7 @@ def get_contact(current_user, id):
 
     # Add reporting hierarchy
     if contact.reports_to:
-        manager = Contact.query_for_site(current_user.site_id).get(contact.reports_to)
+        manager = Contact.query_for_site(current_user.site_id).filter_by(contact_id=contact.reports_to).first()
         if manager:
             data['manager'] = {
                 'contact_id': manager.contact_id,
@@ -145,7 +142,7 @@ def create_contact(current_user):
         return jsonify({'error': 'Validation failed', 'messages': err.messages}), 400
 
     # Verify company exists
-    company = Company.query_for_site(current_user.site_id).get(data['company_id'])
+    company = Company.query_for_site(current_user.site_id).filter_by(company_id=data['company_id']).first()
     if not company or company.is_admin_hidden:
         return jsonify({'error': 'Company not found'}), 404
 
@@ -153,8 +150,7 @@ def create_contact(current_user):
     if data.get('email1'):
         existing = Contact.query_for_site(current_user.site_id).filter_by(
             email1=data['email1'],
-            company_id=data['company_id'],
-            is_admin_hidden=False
+            company_id=data['company_id']
         ).first()
         if existing:
             return jsonify({
@@ -200,9 +196,6 @@ def update_contact(current_user, id):
     """
     contact = Contact.query_for_site(current_user.site_id).filter_by(contact_id=id).first_or_404()
 
-    if contact.is_admin_hidden:
-        return jsonify({'error': 'Contact not found'}), 404
-
     try:
         data = contact_schema.load(request.json, partial=True)
     except ValidationError as err:
@@ -242,13 +235,8 @@ def delete_contact(current_user, id):
     """
     contact = Contact.query_for_site(current_user.site_id).filter_by(contact_id=id).first_or_404()
 
-    if contact.is_admin_hidden:
-        return jsonify({'error': 'Contact not found'}), 404
-
-    # Soft delete
-    contact.is_admin_hidden = True
-    contact.date_modified_by = current_user.user_id
-
+    # Hard delete
+    db.session.delete(contact)
     db.session.commit()
 
     # Log activity
@@ -275,9 +263,6 @@ def mark_left_company(current_user, id):
     POST /api/v1/contacts/123/mark-left-company
     """
     contact = Contact.query_for_site(current_user.site_id).filter_by(contact_id=id).first_or_404()
-
-    if contact.is_admin_hidden:
-        return jsonify({'error': 'Contact not found'}), 404
 
     contact.left_company = True
     contact.date_modified_by = current_user.user_id
