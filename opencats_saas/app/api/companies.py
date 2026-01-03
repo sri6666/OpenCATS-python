@@ -93,8 +93,7 @@ def get_company(current_user, id):
 
     # Add contacts
     contacts = Contact.query_for_site(current_user.site_id).filter_by(
-        company_id=id,
-        is_admin_hidden=False
+        company_id=id
     ).all()
     data['contacts'] = [
         {
