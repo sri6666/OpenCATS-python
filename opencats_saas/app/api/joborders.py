@@ -14,7 +14,7 @@ from sqlalchemy import or_
 from marshmallow import ValidationError
 
 
-@api_bp.route('/jobs', methods=['GET'])
+@api_bp.route('/joborders', methods=['GET'])
 @token_required
 def get_jobs(current_user):
     """
@@ -97,7 +97,7 @@ def get_jobs(current_user):
     }), 200
 
 
-@api_bp.route('/jobs/<int:id>', methods=['GET'])
+@api_bp.route('/joborders/<int:id>', methods=['GET'])
 @token_required
 def get_job(current_user, id):
     """
@@ -138,7 +138,7 @@ def get_job(current_user, id):
     return jsonify(data), 200
 
 
-@api_bp.route('/jobs', methods=['POST'])
+@api_bp.route('/joborders', methods=['POST'])
 @token_required
 def create_job(current_user):
     """
@@ -168,7 +168,7 @@ def create_job(current_user):
         return jsonify({'error': 'Validation failed', 'messages': err.messages}), 400
 
     # Verify company exists
-    company = Company.query_for_site(current_user.site_id).get(data['company_id'])
+    company = Company.query_for_site(current_user.site_id).filter_by(company_id=data['company_id']).first()
     if not company:
         return jsonify({'error': 'Company not found'}), 404
 
@@ -199,7 +199,7 @@ def create_job(current_user):
     return jsonify(joborder_schema.dump(job)), 201
 
 
-@api_bp.route('/jobs/<int:id>', methods=['PUT'])
+@api_bp.route('/joborders/<int:id>', methods=['PUT'])
 @token_required
 def update_job(current_user, id):
     """
@@ -245,7 +245,7 @@ def update_job(current_user, id):
     return jsonify(joborder_schema.dump(job)), 200
 
 
-@api_bp.route('/jobs/<int:id>', methods=['DELETE'])
+@api_bp.route('/joborders/<int:id>', methods=['DELETE'])
 @token_required
 def delete_job(current_user, id):
     """
@@ -279,7 +279,7 @@ def delete_job(current_user, id):
     return jsonify({'message': 'Job order deleted successfully'}), 200
 
 
-@api_bp.route('/jobs/<int:id>/pipeline', methods=['GET'])
+@api_bp.route('/joborders/<int:id>/pipeline', methods=['GET'])
 @token_required
 def get_job_pipeline(current_user, id):
     """
@@ -350,7 +350,7 @@ def get_job_pipeline(current_user, id):
     return jsonify({'data': data, 'total_candidates': len(entries)}), 200
 
 
-@api_bp.route('/jobs/<int:id>/pipeline/<int:entry_id>/status', methods=['PUT'])
+@api_bp.route('/joborders/<int:id>/pipeline/<int:entry_id>/status', methods=['PUT'])
 @token_required
 def update_pipeline_status(current_user, id, entry_id):
     """
@@ -404,7 +404,7 @@ def update_pipeline_status(current_user, id, entry_id):
     return jsonify(pipeline_entry_schema.dump(entry)), 200
 
 
-@api_bp.route('/jobs/<int:id>/activities', methods=['GET'])
+@api_bp.route('/joborders/<int:id>/activities', methods=['GET'])
 @token_required
 def get_job_activities(current_user, id):
     """
