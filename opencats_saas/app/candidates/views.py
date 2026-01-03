@@ -153,6 +153,7 @@ def add():
 
 
 @candidates_bp.route('/<int:id>/edit', methods=['GET', 'POST'])
+@candidates_bp.route('/edit/<int:id>', methods=['GET', 'POST'])  # Alias for compatibility
 @login_required
 @permission_required('candidates.edit')
 def edit(id):
@@ -186,6 +187,7 @@ def edit(id):
 
 
 @candidates_bp.route('/<int:id>/delete', methods=['POST'])
+@candidates_bp.route('/delete/<int:id>', methods=['POST'])  # Alias for compatibility
 @login_required
 @permission_required('candidates.delete')
 def delete(id):
@@ -206,6 +208,7 @@ def delete(id):
 
 
 @candidates_bp.route('/<int:id>/upload-resume', methods=['POST'])
+@candidates_bp.route('/upload-resume/<int:id>', methods=['POST'])  # Alias for compatibility
 @login_required
 @permission_required('candidates.edit')
 def upload_resume(id):
