@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "components/form_macros.html" import render_hot_flag %}
 
-{% block title %}Pipeline: {{ job.title }} - Job Orders{% endblock %}
+{% block title %}Pipeline: {{ joborder.title }} - Job Orders{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -48,19 +48,19 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h1 class="h2">
-            {{ render_hot_flag(job.is_hot) }}
-            {{ job.title }}
+            {{ render_hot_flag(joborder.is_hot) }}
+            {{ joborder.title }}
         </h1>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ url_for('joborders.index') }}">Job Orders</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('joborders.show', id=job.joborder_id) }}">{{ job.title }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('joborders.show', id=joborder.joborder_id) }}">{{ joborder.title }}</a></li>
                 <li class="breadcrumb-item active">Pipeline</li>
             </ol>
         </nav>
     </div>
     <div>
-        <a href="{{ url_for('joborders.show', id=job.joborder_id) }}" class="btn btn-outline-secondary">
+        <a href="{{ url_for('joborders.show', id=joborder.joborder_id) }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-2"></i>Back to Job
         </a>
     </div>
@@ -82,7 +82,7 @@
         <div class="card">
             <div class="card-body">
                 <h6 class="text-muted mb-1">Openings</h6>
-                <h2 class="mb-0">{{ job.openings_available }} / {{ job.openings }}</h2>
+                <h2 class="mb-0">{{ joborder.openings_available }} / {{ joborder.openings }}</h2>
             </div>
         </div>
     </div>
@@ -113,12 +113,12 @@
     <div class="card-body">
         <div class="pipeline-container">
             <!-- No Contact -->
-            <div class="pipeline-column" data-status="0" data-job-id="{{ job.joborder_id }}">
+            <div class="pipeline-column" data-status="0" data-job-id="{{ joborder.joborder_id }}">
                 <div class="pipeline-column-header">
                     <i class="bi bi-person me-2"></i>No Contact
-                    <span class="badge bg-secondary float-end">{{ pipeline_grouped.get(0, [])|length }}</span>
+                    <span class="badge bg-secondary float-end">{{ pipeline_by_status.get(0, [])|length }}</span>
                 </div>
-                {% for entry in pipeline_grouped.get(0, []) %}
+                {% for entry in pipeline_by_status.get(0, []) %}
                 <div class="pipeline-card" draggable="true" data-entry-id="{{ entry.candidate_joborder_id }}" data-candidate-id="{{ entry.candidate_id }}">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <strong>{{ entry.candidate.first_name }} {{ entry.candidate.last_name }}</strong>
@@ -140,12 +140,12 @@
             </div>
 
             <!-- Contacted -->
-            <div class="pipeline-column" data-status="200" data-job-id="{{ job.joborder_id }}">
+            <div class="pipeline-column" data-status="200" data-job-id="{{ joborder.joborder_id }}">
                 <div class="pipeline-column-header">
                     <i class="bi bi-telephone me-2"></i>Contacted
-                    <span class="badge bg-info float-end">{{ pipeline_grouped.get(200, [])|length }}</span>
+                    <span class="badge bg-info float-end">{{ pipeline_by_status.get(200, [])|length }}</span>
                 </div>
-                {% for entry in pipeline_grouped.get(200, []) %}
+                {% for entry in pipeline_by_status.get(200, []) %}
                 <div class="pipeline-card" draggable="true" data-entry-id="{{ entry.candidate_joborder_id }}" data-candidate-id="{{ entry.candidate_id }}">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <strong>{{ entry.candidate.first_name }} {{ entry.candidate.last_name }}</strong>
@@ -164,12 +164,12 @@
             </div>
 
             <!-- Qualifying -->
-            <div class="pipeline-column" data-status="300" data-job-id="{{ job.joborder_id }}">
+            <div class="pipeline-column" data-status="300" data-job-id="{{ joborder.joborder_id }}">
                 <div class="pipeline-column-header">
                     <i class="bi bi-clipboard-check me-2"></i>Qualifying
-                    <span class="badge bg-warning float-end">{{ pipeline_grouped.get(300, [])|length }}</span>
+                    <span class="badge bg-warning float-end">{{ pipeline_by_status.get(300, [])|length }}</span>
                 </div>
-                {% for entry in pipeline_grouped.get(300, []) %}
+                {% for entry in pipeline_by_status.get(300, []) %}
                 <div class="pipeline-card" draggable="true" data-entry-id="{{ entry.candidate_joborder_id }}" data-candidate-id="{{ entry.candidate_id }}">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <strong>{{ entry.candidate.first_name }} {{ entry.candidate.last_name }}</strong>
@@ -188,12 +188,12 @@
             </div>
 
             <!-- Submitted -->
-            <div class="pipeline-column" data-status="400" data-job-id="{{ job.joborder_id }}">
+            <div class="pipeline-column" data-status="400" data-job-id="{{ joborder.joborder_id }}">
                 <div class="pipeline-column-header">
                     <i class="bi bi-send me-2"></i>Submitted
-                    <span class="badge bg-purple float-end">{{ pipeline_grouped.get(400, [])|length }}</span>
+                    <span class="badge bg-purple float-end">{{ pipeline_by_status.get(400, [])|length }}</span>
                 </div>
-                {% for entry in pipeline_grouped.get(400, []) %}
+                {% for entry in pipeline_by_status.get(400, []) %}
                 <div class="pipeline-card" draggable="true" data-entry-id="{{ entry.candidate_joborder_id }}" data-candidate-id="{{ entry.candidate_id }}">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <strong>{{ entry.candidate.first_name }} {{ entry.candidate.last_name }}</strong>
@@ -212,12 +212,12 @@
             </div>
 
             <!-- Interviewing -->
-            <div class="pipeline-column" data-status="500" data-job-id="{{ job.joborder_id }}">
+            <div class="pipeline-column" data-status="500" data-job-id="{{ joborder.joborder_id }}">
                 <div class="pipeline-column-header">
                     <i class="bi bi-camera-video me-2"></i>Interviewing
-                    <span class="badge bg-orange float-end">{{ pipeline_grouped.get(500, [])|length }}</span>
+                    <span class="badge bg-orange float-end">{{ pipeline_by_status.get(500, [])|length }}</span>
                 </div>
-                {% for entry in pipeline_grouped.get(500, []) %}
+                {% for entry in pipeline_by_status.get(500, []) %}
                 <div class="pipeline-card" draggable="true" data-entry-id="{{ entry.candidate_joborder_id }}" data-candidate-id="{{ entry.candidate_id }}">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <strong>{{ entry.candidate.first_name }} {{ entry.candidate.last_name }}</strong>
@@ -236,12 +236,12 @@
             </div>
 
             <!-- Offered -->
-            <div class="pipeline-column" data-status="600" data-job-id="{{ job.joborder_id }}">
+            <div class="pipeline-column" data-status="600" data-job-id="{{ joborder.joborder_id }}">
                 <div class="pipeline-column-header">
                     <i class="bi bi-gift me-2"></i>Offered
-                    <span class="badge bg-success float-end">{{ pipeline_grouped.get(600, [])|length }}</span>
+                    <span class="badge bg-success float-end">{{ pipeline_by_status.get(600, [])|length }}</span>
                 </div>
-                {% for entry in pipeline_grouped.get(600, []) %}
+                {% for entry in pipeline_by_status.get(600, []) %}
                 <div class="pipeline-card" draggable="true" data-entry-id="{{ entry.candidate_joborder_id }}" data-candidate-id="{{ entry.candidate_id }}">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <strong>{{ entry.candidate.first_name }} {{ entry.candidate.last_name }}</strong>
@@ -260,12 +260,12 @@
             </div>
 
             <!-- Placed -->
-            <div class="pipeline-column" data-status="800" data-job-id="{{ job.joborder_id }}">
+            <div class="pipeline-column" data-status="800" data-job-id="{{ joborder.joborder_id }}">
                 <div class="pipeline-column-header">
                     <i class="bi bi-trophy me-2"></i>Placed
-                    <span class="badge bg-dark float-end">{{ pipeline_grouped.get(800, [])|length }}</span>
+                    <span class="badge bg-dark float-end">{{ pipeline_by_status.get(800, [])|length }}</span>
                 </div>
-                {% for entry in pipeline_grouped.get(800, []) %}
+                {% for entry in pipeline_by_status.get(800, []) %}
                 <div class="pipeline-card" draggable="true" data-entry-id="{{ entry.candidate_joborder_id }}" data-candidate-id="{{ entry.candidate_id }}">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <strong>{{ entry.candidate.first_name }} {{ entry.candidate.last_name }}</strong>

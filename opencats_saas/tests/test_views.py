@@ -47,8 +47,9 @@ class TestDashboardViews:
     def test_dashboard_requires_login(self, client):
         """Test that dashboard requires authentication"""
         response = client.get('/dashboard', follow_redirects=True)
-        # Should redirect to login
-        assert response.status_code in [302, 401]
+        # Should redirect to login and show login page
+        assert response.status_code == 200
+        assert b'Login' in response.data or b'login' in response.data
 
     def test_dashboard_authenticated(self, auth_client):
         """Test dashboard with authenticated user"""

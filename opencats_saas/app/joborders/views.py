@@ -210,6 +210,7 @@ def delete(id):
 
 
 @joborders_bp.route('/<int:id>/pipeline')
+@joborders_bp.route('/pipeline/<int:id>')  # Alias for compatibility
 @login_required
 @permission_required('joborders.view')
 def pipeline(id):
@@ -235,14 +236,17 @@ def pipeline(id):
 
     # Group candidates by status
     pipeline_by_status = {status['id']: [] for status in statuses}
+    pipeline_stats = {status['id']: 0 for status in statuses}
     for entry in pipeline_entries:
         if entry.status in pipeline_by_status:
             pipeline_by_status[entry.status].append(entry)
+            pipeline_stats[entry.status] += 1
 
     return render_template('joborders/pipeline.html',
                          joborder=joborder,
                          statuses=statuses,
-                         pipeline_by_status=pipeline_by_status)
+                         pipeline_by_status=pipeline_by_status,
+                         pipeline_stats=pipeline_stats)
 
 
 @joborders_bp.route('/<int:job_id>/add-candidate', methods=['GET', 'POST'])
