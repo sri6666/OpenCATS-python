@@ -79,7 +79,7 @@ def test_site(db_session):
     site = Site(
         name='Test Company',
         subdomain='testcompany',
-        subscription_plan='professional',
+        subscription_plan='enterprise',
         subscription_status='active',
         is_active=True
     )
@@ -217,10 +217,15 @@ def auth_client(client, admin_user):
 
 
 @pytest.fixture
-def api_headers(test_site):
-    """Create API authentication headers"""
+def api_headers(admin_user, app):
+    """Create API authentication headers with JWT token"""
+    from app.api.auth import generate_token
+
+    with app.app_context():
+        token = generate_token(admin_user)
+
     return {
-        'X-API-Key': test_site.api_key,
+        'Authorization': f'Bearer {token}',
         'Content-Type': 'application/json'
     }
 
