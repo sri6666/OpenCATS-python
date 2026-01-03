@@ -274,6 +274,40 @@ def upload_resume(id):
     return redirect(url_for('candidates.show', id=id))
 
 
+@candidates_bp.route('/<int:id>/toggle-hot', methods=['POST'])
+@login_required
+@permission_required('candidates.edit')
+def toggle_hot(id):
+    """Toggle hot status for candidate"""
+    candidate = Candidate.query_for_site(current_user.site_id).filter_by(candidate_id=id).first_or_404()
+
+    candidate.is_hot = not candidate.is_hot
+    candidate.date_modified = datetime.utcnow()
+    db.session.commit()
+
+    status = 'hot' if candidate.is_hot else 'normal'
+    flash(f'Candidate marked as {status}.', 'success')
+    return redirect(url_for('candidates.show', id=id))
+
+
+@candidates_bp.route('/<int:id>/download-resume/<int:attachment_id>')
+@login_required
+@permission_required('candidates.view')
+def download_resume(id, attachment_id):
+    """Download candidate resume"""
+    from flask import send_file
+
+    candidate = Candidate.query_for_site(current_user.site_id).filter_by(candidate_id=id).first_or_404()
+
+    attachment = Attachment.query_for_site(current_user.site_id).filter_by(
+        attachment_id=attachment_id,
+        data_item_id=candidate.candidate_id,
+        data_item_type=100
+    ).first_or_404()
+
+    return send_file(attachment.storage_path, as_attachment=True, download_name=attachment.original_filename)
+
+
 @candidates_bp.route('/search', methods=['GET', 'POST'])
 @login_required
 @permission_required('candidates.view')

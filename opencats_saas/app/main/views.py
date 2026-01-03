@@ -127,6 +127,27 @@ def settings():
     return render_template('main/settings.html')
 
 
+@main_bp.route('/calendar')
+@login_required
+def calendar():
+    """Calendar/scheduling page"""
+    return render_template('main/calendar.html')
+
+
+@main_bp.route('/activities')
+@login_required
+def activities():
+    """Activity feed page"""
+    return render_template('main/activities.html')
+
+
+@main_bp.route('/reports')
+@login_required
+def reports():
+    """Reports and analytics page"""
+    return render_template('main/reports.html')
+
+
 @main_bp.route('/health')
 def health_check():
     """Health check endpoint for monitoring"""
