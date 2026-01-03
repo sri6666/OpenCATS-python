@@ -193,7 +193,9 @@ class User(UserMixin, TenantModel):
     @property
     def full_name(self):
         """Get full name"""
-        return f"{self.first_name} {self.last_name}".strip() or self.username
+        if self.first_name or self.last_name:
+            return f"{self.first_name or ''} {self.last_name or ''}".strip()
+        return self.username
 
     @property
     def is_admin(self):

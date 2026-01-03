@@ -188,9 +188,9 @@ class TestJobOrderModel:
         assert job.title == 'Software Engineer'
         assert job.openings == 3
 
-    def test_query_for_site(self, test_site, test_job, db_session):
+    def test_query_for_site(self, test_site, test_job, db_session, admin_user):
         """Test site-specific job querying"""
-        # Create another site and job
+        # Create another site
         other_site = Site(
             name='Other Site',
             subdomain='othersite2',
@@ -200,8 +200,20 @@ class TestJobOrderModel:
         db_session.add(other_site)
         db_session.commit()
 
+        # Create a company for the other site
+        other_company = Company(
+            site_id=other_site.site_id,
+            name='Other Company',
+            phone1='555-9999',
+            entered_by=admin_user.user_id
+        )
+        db_session.add(other_company)
+        db_session.commit()
+
+        # Create job for other site
         other_job = JobOrder(
             site_id=other_site.site_id,
+            company_id=other_company.company_id,
             title='Other Job',
             type=1,
             status=0,
@@ -289,12 +301,12 @@ class TestCandidateJobOrderModel:
             candidate_id=test_candidate.candidate_id,
             joborder_id=test_job.joborder_id,
             status=200,  # Contacted
-            added_by=admin_user.user_id
+            entered_by=admin_user.user_id
         )
         db_session.add(pipeline)
         db_session.commit()
 
-        assert pipeline.candidatejoborder_id is not None
+        assert pipeline.candidate_joborder_id is not None
         assert pipeline.status == 200
         assert pipeline.candidate_id == test_candidate.candidate_id
 
@@ -305,7 +317,7 @@ class TestCandidateJobOrderModel:
             candidate_id=test_candidate.candidate_id,
             joborder_id=test_job.joborder_id,
             status=0,  # No Contact
-            added_by=admin_user.user_id
+            entered_by=admin_user.user_id
         )
         db_session.add(pipeline)
         db_session.commit()

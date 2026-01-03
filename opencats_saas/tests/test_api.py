@@ -15,9 +15,11 @@ class TestAPIAuth:
         response = client.get('/api/v1/candidates')
         assert response.status_code == 401
 
-    def test_api_with_invalid_key(self, client):
+    def test_api_with_invalid_key(self, client, api_headers):
         """Test API with invalid key"""
-        response = client.get('/api/v1/candidates', headers=api_headers)
+        # Modify headers to use invalid token
+        invalid_headers = {**api_headers, 'Authorization': 'Bearer invalid_token'}
+        response = client.get('/api/v1/candidates', headers=invalid_headers)
         assert response.status_code == 401
 
     def test_api_with_valid_key(self, client, test_site, api_headers):
@@ -53,7 +55,7 @@ class TestCandidateAPI:
         assert data['first_name'] == 'Alice'
         assert data['last_name'] == 'Johnson'
 
-    def test_create_candidate(self, client, test_site, admin_user):
+    def test_create_candidate(self, client, test_site, admin_user, api_headers):
         """Test POST /api/v1/candidates"""
 
         candidate_data = {
@@ -75,7 +77,7 @@ class TestCandidateAPI:
         assert data['first_name'] == 'Bob'
         assert 'candidate_id' in data
 
-    def test_update_candidate(self, client, test_site, test_candidate):
+    def test_update_candidate(self, client, test_site, test_candidate, api_headers):
         """Test PUT /api/v1/candidates/<id>"""
 
         update_data = {
@@ -90,7 +92,7 @@ class TestCandidateAPI:
         )
         assert response.status_code in [200, 204]
 
-    def test_delete_candidate(self, client, test_site, test_candidate):
+    def test_delete_candidate(self, client, test_site, test_candidate, api_headers):
         """Test DELETE /api/v1/candidates/<id>"""
 
         response = client.delete(
@@ -99,7 +101,7 @@ class TestCandidateAPI:
         )
         assert response.status_code in [200, 204]
 
-    def test_search_candidates(self, client, test_site, test_candidate):
+    def test_search_candidates(self, client, test_site, test_candidate, api_headers):
         """Test GET /api/v1/candidates?search=keyword"""
 
         response = client.get(
@@ -121,13 +123,13 @@ class TestCandidateAPI:
 class TestJobOrderAPI:
     """Tests for JobOrder API endpoints"""
 
-    def test_list_jobs(self, client, test_site, test_job):
+    def test_list_jobs(self, client, test_site, test_job, api_headers):
         """Test GET /api/v1/joborders"""
 
         response = client.get('/api/v1/joborders', headers=api_headers)
         assert response.status_code == 200
 
-    def test_get_job_detail(self, client, test_site, test_job):
+    def test_get_job_detail(self, client, test_site, test_job, api_headers):
         """Test GET /api/v1/joborders/<id>"""
 
         response = client.get(
@@ -139,7 +141,7 @@ class TestJobOrderAPI:
         data = json.loads(response.data)
         assert data['title'] == 'Senior Python Developer'
 
-    def test_create_job(self, client, test_site, test_company, admin_user):
+    def test_create_job(self, client, test_site, test_company, admin_user, api_headers):
         """Test POST /api/v1/joborders"""
 
         job_data = {
@@ -163,13 +165,13 @@ class TestJobOrderAPI:
 class TestCompanyAPI:
     """Tests for Company API endpoints"""
 
-    def test_list_companies(self, client, test_site, test_company):
+    def test_list_companies(self, client, test_site, test_company, api_headers):
         """Test GET /api/v1/companies"""
 
         response = client.get('/api/v1/companies', headers=api_headers)
         assert response.status_code == 200
 
-    def test_get_company_detail(self, client, test_site, test_company):
+    def test_get_company_detail(self, client, test_site, test_company, api_headers):
         """Test GET /api/v1/companies/<id>"""
 
         response = client.get(
@@ -181,7 +183,7 @@ class TestCompanyAPI:
         data = json.loads(response.data)
         assert data['name'] == 'Tech Innovations Inc'
 
-    def test_create_company(self, client, test_site, admin_user):
+    def test_create_company(self, client, test_site, admin_user, api_headers):
         """Test POST /api/v1/companies"""
 
         company_data = {
@@ -202,13 +204,13 @@ class TestCompanyAPI:
 class TestContactAPI:
     """Tests for Contact API endpoints"""
 
-    def test_list_contacts(self, client, test_site, test_contact):
+    def test_list_contacts(self, client, test_site, test_contact, api_headers):
         """Test GET /api/v1/contacts"""
 
         response = client.get('/api/v1/contacts', headers=api_headers)
         assert response.status_code == 200
 
-    def test_get_contact_detail(self, client, test_site, test_contact):
+    def test_get_contact_detail(self, client, test_site, test_contact, api_headers):
         """Test GET /api/v1/contacts/<id>"""
 
         response = client.get(
@@ -225,7 +227,7 @@ class TestContactAPI:
 class TestPipelineAPI:
     """Tests for candidate pipeline API"""
 
-    def test_add_candidate_to_job(self, client, test_site, test_candidate, test_job):
+    def test_add_candidate_to_job(self, client, test_site, test_candidate, test_job, api_headers):
         """Test POST /api/v1/pipeline"""
 
         pipeline_data = {
@@ -241,7 +243,7 @@ class TestPipelineAPI:
         )
         assert response.status_code in [201, 200]
 
-    def test_update_pipeline_status(self, client, test_site, test_candidate, test_job, db_session):
+    def test_update_pipeline_status(self, client, test_site, test_candidate, test_job, db_session, api_headers):
         """Test PUT /api/v1/pipeline/<id>"""
         from app.models import CandidateJobOrder
 
@@ -251,7 +253,7 @@ class TestPipelineAPI:
             candidate_id=test_candidate.candidate_id,
             joborder_id=test_job.joborder_id,
             status=200,
-            added_by=1
+            entered_by=1
         )
         db_session.add(pipeline)
         db_session.commit()
@@ -260,7 +262,7 @@ class TestPipelineAPI:
         update_data = {'status': 600}  # Interviewed
 
         response = client.put(
-            f'/api/v1/pipeline/{pipeline.candidatejoborder_id}',
+            f'/api/v1/pipeline/{pipeline.candidate_joborder_id}',
             headers=api_headers,
             data=json.dumps(update_data)
         )
@@ -270,7 +272,7 @@ class TestPipelineAPI:
 class TestAPIFiltering:
     """Tests for API filtering and pagination"""
 
-    def test_filter_by_status(self, client, test_site, test_candidate):
+    def test_filter_by_status(self, client, test_site, test_candidate, api_headers):
         """Test filtering candidates by status"""
 
         response = client.get(
@@ -279,7 +281,7 @@ class TestAPIFiltering:
         )
         assert response.status_code == 200
 
-    def test_pagination(self, client, test_site, db_session, admin_user):
+    def test_pagination(self, client, test_site, db_session, admin_user, api_headers):
         """Test API pagination"""
         # Create multiple candidates
         for i in range(25):
@@ -308,7 +310,7 @@ class TestAPIFiltering:
         # Should return pagination info
         assert 'total' in data or 'count' in data or isinstance(data, list)
 
-    def test_sorting(self, client, test_site, test_candidate):
+    def test_sorting(self, client, test_site, test_candidate, api_headers):
         """Test API sorting"""
 
         response = client.get(
@@ -321,13 +323,13 @@ class TestAPIFiltering:
 class TestAPIErrors:
     """Tests for API error handling"""
 
-    def test_404_not_found(self, client, test_site):
+    def test_404_not_found(self, client, test_site, api_headers):
         """Test 404 error for non-existent resource"""
 
         response = client.get('/api/v1/candidates/99999', headers=api_headers)
         assert response.status_code == 404
 
-    def test_400_bad_request(self, client, test_site):
+    def test_400_bad_request(self, client, test_site, api_headers):
         """Test 400 error for invalid data"""
 
         # Missing required fields
@@ -340,7 +342,7 @@ class TestAPIErrors:
         )
         assert response.status_code in [400, 422]
 
-    def test_method_not_allowed(self, client, test_site):
+    def test_method_not_allowed(self, client, test_site, api_headers):
         """Test 405 error for unsupported method"""
 
         # PATCH might not be supported
