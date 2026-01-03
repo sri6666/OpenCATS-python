@@ -70,6 +70,7 @@ def index():
 
 
 @contacts_bp.route('/<int:id>')
+@contacts_bp.route('/view/<int:id>')
 @login_required
 @permission_required('contacts.view')
 def show(id):

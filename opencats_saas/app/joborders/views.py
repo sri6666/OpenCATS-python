@@ -80,6 +80,7 @@ def index():
 
 
 @joborders_bp.route('/<int:id>')
+@joborders_bp.route('/view/<int:id>')
 @login_required
 @permission_required('joborders.view')
 def show(id):

@@ -57,6 +57,7 @@ def index():
 
 
 @companies_bp.route('/<int:id>')
+@companies_bp.route('/view/<int:id>')
 @login_required
 @permission_required('companies.view')
 def show(id):

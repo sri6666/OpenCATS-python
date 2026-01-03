@@ -74,6 +74,7 @@ def index():
 
 
 @candidates_bp.route('/<int:id>')
+@candidates_bp.route('/view/<int:id>')
 @login_required
 @permission_required('candidates.view')
 def show(id):
