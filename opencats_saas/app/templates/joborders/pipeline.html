@@ -54,13 +54,13 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ url_for('joborders.index') }}">Job Orders</a></li>
-                <li class="breadcrumb-item"><a href="{{ url_for('joborders.view', id=job.joborder_id) }}">{{ job.title }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('joborders.show', id=job.joborder_id) }}">{{ job.title }}</a></li>
                 <li class="breadcrumb-item active">Pipeline</li>
             </ol>
         </nav>
     </div>
     <div>
-        <a href="{{ url_for('joborders.view', id=job.joborder_id) }}" class="btn btn-outline-secondary">
+        <a href="{{ url_for('joborders.show', id=job.joborder_id) }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-2"></i>Back to Job
         </a>
     </div>
@@ -131,7 +131,7 @@
                         <i class="bi bi-phone me-1"></i>{{ entry.candidate.phone_cell or '-' }}
                     </p>
                     <div class="mt-2">
-                        <a href="{{ url_for('candidates.view', id=entry.candidate_id) }}" class="btn btn-sm btn-outline-primary w-100" onclick="event.stopPropagation()">
+                        <a href="{{ url_for('candidates.show', id=entry.candidate_id) }}" class="btn btn-sm btn-outline-primary w-100" onclick="event.stopPropagation()">
                             View Profile
                         </a>
                     </div>
@@ -155,7 +155,7 @@
                         <i class="bi bi-envelope me-1"></i>{{ entry.candidate.email1 }}
                     </p>
                     <div class="mt-2">
-                        <a href="{{ url_for('candidates.view', id=entry.candidate_id) }}" class="btn btn-sm btn-outline-primary w-100" onclick="event.stopPropagation()">
+                        <a href="{{ url_for('candidates.show', id=entry.candidate_id) }}" class="btn btn-sm btn-outline-primary w-100" onclick="event.stopPropagation()">
                             View Profile
                         </a>
                     </div>
@@ -179,7 +179,7 @@
                         <i class="bi bi-envelope me-1"></i>{{ entry.candidate.email1 }}
                     </p>
                     <div class="mt-2">
-                        <a href="{{ url_for('candidates.view', id=entry.candidate_id) }}" class="btn btn-sm btn-outline-primary w-100" onclick="event.stopPropagation()">
+                        <a href="{{ url_for('candidates.show', id=entry.candidate_id) }}" class="btn btn-sm btn-outline-primary w-100" onclick="event.stopPropagation()">
                             View Profile
                         </a>
                     </div>
@@ -203,7 +203,7 @@
                         <i class="bi bi-envelope me-1"></i>{{ entry.candidate.email1 }}
                     </p>
                     <div class="mt-2">
-                        <a href="{{ url_for('candidates.view', id=entry.candidate_id) }}" class="btn btn-sm btn-outline-primary w-100" onclick="event.stopPropagation()">
+                        <a href="{{ url_for('candidates.show', id=entry.candidate_id) }}" class="btn btn-sm btn-outline-primary w-100" onclick="event.stopPropagation()">
                             View Profile
                         </a>
                     </div>
@@ -227,7 +227,7 @@
                         <i class="bi bi-envelope me-1"></i>{{ entry.candidate.email1 }}
                     </p>
                     <div class="mt-2">
-                        <a href="{{ url_for('candidates.view', id=entry.candidate_id) }}" class="btn btn-sm btn-outline-primary w-100" onclick="event.stopPropagation()">
+                        <a href="{{ url_for('candidates.show', id=entry.candidate_id) }}" class="btn btn-sm btn-outline-primary w-100" onclick="event.stopPropagation()">
                             View Profile
                         </a>
                     </div>
@@ -251,7 +251,7 @@
                         <i class="bi bi-envelope me-1"></i>{{ entry.candidate.email1 }}
                     </p>
                     <div class="mt-2">
-                        <a href="{{ url_for('candidates.view', id=entry.candidate_id) }}" class="btn btn-sm btn-outline-primary w-100" onclick="event.stopPropagation()">
+                        <a href="{{ url_for('candidates.show', id=entry.candidate_id) }}" class="btn btn-sm btn-outline-primary w-100" onclick="event.stopPropagation()">
                             View Profile
                         </a>
                     </div>
@@ -278,7 +278,7 @@
                         <i class="bi bi-check-circle-fill me-1"></i>Placed on {{ entry.date_modified|date }}
                     </p>
                     <div class="mt-2">
-                        <a href="{{ url_for('candidates.view', id=entry.candidate_id) }}" class="btn btn-sm btn-outline-primary w-100" onclick="event.stopPropagation()">
+                        <a href="{{ url_for('candidates.show', id=entry.candidate_id) }}" class="btn btn-sm btn-outline-primary w-100" onclick="event.stopPropagation()">
                             View Profile
                         </a>
                     </div>

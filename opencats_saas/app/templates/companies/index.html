@@ -61,7 +61,7 @@
                     {% for company in companies.items %}
                     <tr>
                         <td>
-                            <a href="{{ url_for('companies.view', company_id=company.company_id) }}" class="text-decoration-none">
+                            <a href="{{ url_for('companies.show', company_id=company.company_id) }}" class="text-decoration-none">
                                 <strong>{{ company.name }}</strong>
                             </a>
                             {% if company.is_hot %}

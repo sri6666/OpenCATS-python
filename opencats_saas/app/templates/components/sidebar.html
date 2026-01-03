@@ -11,7 +11,7 @@
 
             <!-- Candidates -->
             <li class="nav-item">
-                <a class="nav-link {% if 'candidates' in request.endpoint %}active{% endif %}" href="{{ url_for('candidates.index') }}">
+                <a class="nav-link {% if request.endpoint and 'candidates' in request.endpoint %}active{% endif %}" href="{{ url_for('candidates.index') }}">
                     <i class="bi bi-people me-2"></i>
                     Candidates
                 </a>
@@ -19,7 +19,7 @@
 
             <!-- Job Orders -->
             <li class="nav-item">
-                <a class="nav-link {% if 'joborders' in request.endpoint %}active{% endif %}" href="{{ url_for('joborders.index') }}">
+                <a class="nav-link {% if request.endpoint and 'joborders' in request.endpoint %}active{% endif %}" href="{{ url_for('joborders.index') }}">
                     <i class="bi bi-briefcase me-2"></i>
                     Job Orders
                 </a>
@@ -27,7 +27,7 @@
 
             <!-- Companies -->
             <li class="nav-item">
-                <a class="nav-link {% if 'companies' in request.endpoint %}active{% endif %}" href="{{ url_for('companies.index') }}">
+                <a class="nav-link {% if request.endpoint and 'companies' in request.endpoint %}active{% endif %}" href="{{ url_for('companies.index') }}">
                     <i class="bi bi-building me-2"></i>
                     Companies
                 </a>
@@ -35,7 +35,7 @@
 
             <!-- Contacts -->
             <li class="nav-item">
-                <a class="nav-link {% if 'contacts' in request.endpoint %}active{% endif %}" href="{{ url_for('contacts.index') }}">
+                <a class="nav-link {% if request.endpoint and 'contacts' in request.endpoint %}active{% endif %}" href="{{ url_for('contacts.index') }}">
                     <i class="bi bi-person-vcard me-2"></i>
                     Contacts
                 </a>
@@ -80,7 +80,7 @@
             {% if current_user.is_admin %}
                 <!-- Admin -->
                 <li class="nav-item">
-                    <a class="nav-link {% if 'admin' in request.endpoint %}active{% endif %}" href="{{ url_for('admin.index') }}">
+                    <a class="nav-link {% if request.endpoint and 'admin' in request.endpoint %}active{% endif %}" href="{{ url_for('admin.index') }}">
                         <i class="bi bi-shield-lock me-2"></i>
                         Admin
                     </a>

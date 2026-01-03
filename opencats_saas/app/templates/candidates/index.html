@@ -86,7 +86,7 @@
                     </thead>
                     <tbody>
                         {% for candidate in candidates %}
-                        <tr data-href="{{ url_for('candidates.view', id=candidate.candidate_id) }}">
+                        <tr data-href="{{ url_for('candidates.show', id=candidate.candidate_id) }}">
                             <td>
                                 {{ render_hot_flag(candidate.is_hot) }}
                                 <strong>{{ candidate.first_name }} {{ candidate.last_name }}</strong>
@@ -109,7 +109,7 @@
                             </td>
                             <td>{{ candidate.date_created|date }}</td>
                             <td onclick="event.stopPropagation()">
-                                <a href="{{ url_for('candidates.view', id=candidate.candidate_id) }}" class="btn btn-sm btn-outline-primary" title="View">
+                                <a href="{{ url_for('candidates.show', id=candidate.candidate_id) }}" class="btn btn-sm btn-outline-primary" title="View">
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 <a href="{{ url_for('candidates.edit', id=candidate.candidate_id) }}" class="btn btn-sm btn-outline-secondary" title="Edit">

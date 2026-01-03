@@ -78,7 +78,7 @@
                     </thead>
                     <tbody>
                         {% for job in jobs %}
-                        <tr data-href="{{ url_for('joborders.view', id=job.joborder_id) }}">
+                        <tr data-href="{{ url_for('joborders.show', id=job.joborder_id) }}">
                             <td>
                                 {{ render_hot_flag(job.is_hot) }}
                                 <strong>{{ job.title }}</strong>
@@ -99,7 +99,7 @@
                             <td>{{ render_status_badge(job.status, 'job') }}</td>
                             <td>{{ job.date_created|date }}</td>
                             <td onclick="event.stopPropagation()">
-                                <a href="{{ url_for('joborders.view', id=job.joborder_id) }}" class="btn btn-sm btn-outline-primary" title="View">
+                                <a href="{{ url_for('joborders.show', id=job.joborder_id) }}" class="btn btn-sm btn-outline-primary" title="View">
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 <a href="{{ url_for('joborders.pipeline', id=job.joborder_id) }}" class="btn btn-sm btn-outline-success" title="Pipeline">

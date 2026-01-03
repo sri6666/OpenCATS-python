@@ -128,7 +128,7 @@
                             {% for contact in contacts %}
                             <tr>
                                 <td>
-                                    <a href="{{ url_for('contacts.view', contact_id=contact.contact_id) }}">
+                                    <a href="{{ url_for('contacts.show', contact_id=contact.contact_id) }}">
                                         {{ contact.first_name }} {{ contact.last_name }}
                                     </a>
                                     {% if contact.is_hot %}
@@ -139,7 +139,7 @@
                                 <td>{{ contact.email1 or '-' }}</td>
                                 <td>{{ contact.phone_work or contact.phone_cell or '-' }}</td>
                                 <td>
-                                    <a href="{{ url_for('contacts.view', contact_id=contact.contact_id) }}"
+                                    <a href="{{ url_for('contacts.show', contact_id=contact.contact_id) }}"
                                        class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye"></i>
                                     </a>
@@ -181,7 +181,7 @@
                             {% for job in joborders %}
                             <tr>
                                 <td>
-                                    <a href="{{ url_for('joborders.view', joborder_id=job.joborder_id) }}">
+                                    <a href="{{ url_for('joborders.show', joborder_id=job.joborder_id) }}">
                                         {{ job.title }}
                                     </a>
                                     {% if job.is_hot %}
@@ -206,7 +206,7 @@
                                 </td>
                                 <td>{{ job.date_created.strftime('%Y-%m-%d') }}</td>
                                 <td>
-                                    <a href="{{ url_for('joborders.view', joborder_id=job.joborder_id) }}"
+                                    <a href="{{ url_for('joborders.show', joborder_id=job.joborder_id) }}"
                                        class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye"></i>
                                     </a>

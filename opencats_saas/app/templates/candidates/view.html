@@ -155,7 +155,7 @@
                         <tbody>
                             {% for entry in pipeline_entries %}
                             <tr>
-                                <td><a href="{{ url_for('joborders.view', id=entry.joborder_id) }}">{{ entry.joborder.title }}</a></td>
+                                <td><a href="{{ url_for('joborders.show', id=entry.joborder_id) }}">{{ entry.joborder.title }}</a></td>
                                 <td>{{ entry.joborder.company.name if entry.joborder.company else '-' }}</td>
                                 <td>{{ render_status_badge(entry.status, 'candidate') }}</td>
                                 <td>

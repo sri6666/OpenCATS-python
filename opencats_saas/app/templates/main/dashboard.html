@@ -173,7 +173,7 @@
                 {% if hot_candidates %}
                     <div class="list-group list-group-flush">
                         {% for candidate in hot_candidates %}
-                            <a href="{{ url_for('candidates.view', id=candidate.candidate_id) }}"
+                            <a href="{{ url_for('candidates.show', id=candidate.candidate_id) }}"
                                class="list-group-item list-group-item-action">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
@@ -218,7 +218,7 @@
                             </thead>
                             <tbody>
                                 {% for job in active_jobs %}
-                                    <tr data-href="{{ url_for('joborders.view', id=job.joborder_id) }}">
+                                    <tr data-href="{{ url_for('joborders.show', id=job.joborder_id) }}">
                                         <td>
                                             {{ render_hot_flag(job.is_hot) }}
                                             <strong>{{ job.title }}</strong>

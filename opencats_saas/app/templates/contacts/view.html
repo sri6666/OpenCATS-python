@@ -50,7 +50,7 @@
                         <strong>Company:</strong>
                         <p>
                             {% if contact.company %}
-                            <a href="{{ url_for('companies.view', company_id=contact.company_id) }}">
+                            <a href="{{ url_for('companies.show', company_id=contact.company_id) }}">
                                 {{ contact.company.name }}
                             </a>
                             {% else %}
@@ -62,7 +62,7 @@
                     <div class="col-md-6">
                         <strong>Reports To:</strong>
                         <p>
-                            <a href="{{ url_for('contacts.view', contact_id=contact.reports_to) }}">
+                            <a href="{{ url_for('contacts.show', contact_id=contact.reports_to) }}">
                                 {{ contact.reports_to_contact.first_name }} {{ contact.reports_to_contact.last_name }}
                             </a>
                         </p>
@@ -159,13 +159,13 @@
                             {% for job in joborders %}
                             <tr>
                                 <td>
-                                    <a href="{{ url_for('joborders.view', joborder_id=job.joborder_id) }}">
+                                    <a href="{{ url_for('joborders.show', joborder_id=job.joborder_id) }}">
                                         {{ job.title }}
                                     </a>
                                 </td>
                                 <td>
                                     {% if job.company %}
-                                    <a href="{{ url_for('companies.view', company_id=job.company_id) }}">
+                                    <a href="{{ url_for('companies.show', company_id=job.company_id) }}">
                                         {{ job.company.name }}
                                     </a>
                                     {% else %}
@@ -189,7 +189,7 @@
                                 </td>
                                 <td>{{ job.date_created.strftime('%Y-%m-%d') }}</td>
                                 <td>
-                                    <a href="{{ url_for('joborders.view', joborder_id=job.joborder_id) }}"
+                                    <a href="{{ url_for('joborders.show', joborder_id=job.joborder_id) }}"
                                        class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye"></i>
                                     </a>
