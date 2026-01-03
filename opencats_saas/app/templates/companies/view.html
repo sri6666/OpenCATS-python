@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}{{ company.name }} - OpenCATS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="bi bi-building"></i> {{ company.name }}
+        {% if company.is_hot %}
+        <span class="badge bg-danger">Hot</span>
+        {% endif %}
+    </h2>
+    <div class="btn-group">
+        <a href="{{ url_for('companies.edit', company_id=company.company_id) }}" class="btn btn-primary">
+            <i class="bi bi-pencil"></i> Edit
+        </a>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+            <i class="bi bi-trash"></i> Delete
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Company Information -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Company Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Company Name:</strong>
+                        <p>{{ company.name }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Website:</strong>
+                        <p>
+                            {% if company.url %}
+                            <a href="{{ company.url }}" target="_blank">{{ company.url }}</a>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Primary Phone:</strong>
+                        <p>{{ company.phone1 or '-' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Secondary Phone:</strong>
+                        <p>{{ company.phone2 or '-' }}</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Fax:</strong>
+                        <p>{{ company.fax or '-' }}</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <strong>Address:</strong>
+                        <p>
+                            {% if company.address %}
+                            {{ company.address }}<br>
+                            {% endif %}
+                            {% if company.city or company.state or company.zip %}
+                            {{ company.city }}{% if company.state %}, {{ company.state }}{% endif %} {{ company.zip }}
+                            {% endif %}
+                            {% if company.country %}
+                            <br>{{ company.country }}
+                            {% endif %}
+                            {% if not (company.address or company.city or company.state or company.zip or company.country) %}
+                            -
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                {% if company.key_technologies %}
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <strong>Key Technologies:</strong>
+                        <p>{{ company.key_technologies }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if company.notes %}
+                <div class="row">
+                    <div class="col-12">
+                        <strong>Notes:</strong>
+                        <p>{{ company.notes }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Contacts -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-people"></i> Contacts ({{ contacts|length }})</h5>
+                <a href="{{ url_for('contacts.add', company_id=company.company_id) }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus"></i> Add Contact
+                </a>
+            </div>
+            <div class="card-body">
+                {% if contacts %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Title</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for contact in contacts %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('contacts.view', contact_id=contact.contact_id) }}">
+                                        {{ contact.first_name }} {{ contact.last_name }}
+                                    </a>
+                                    {% if contact.is_hot %}
+                                    <span class="badge bg-danger">Hot</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ contact.title or '-' }}</td>
+                                <td>{{ contact.email1 or '-' }}</td>
+                                <td>{{ contact.phone_work or contact.phone_cell or '-' }}</td>
+                                <td>
+                                    <a href="{{ url_for('contacts.view', contact_id=contact.contact_id) }}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No contacts found for this company.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Job Orders -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-briefcase"></i> Job Orders ({{ joborders|length }})</h5>
+                <a href="{{ url_for('joborders.add', company_id=company.company_id) }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus"></i> Add Job Order
+                </a>
+            </div>
+            <div class="card-body">
+                {% if joborders %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Openings</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in joborders %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('joborders.view', joborder_id=job.joborder_id) }}">
+                                        {{ job.title }}
+                                    </a>
+                                    {% if job.is_hot %}
+                                    <span class="badge bg-danger">Hot</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if job.type == 'H' %}Full-Time
+                                    {% elif job.type == 'C' %}Contract
+                                    {% elif job.type == 'F' %}Freelance
+                                    {% elif job.type == 'P' %}Part-Time
+                                    {% else %}{{ job.type }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ job.openings_available }}/{{ job.openings }}</td>
+                                <td>
+                                    {% if job.status == 0 %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ job.date_created.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    <a href="{{ url_for('joborders.view', joborder_id=job.joborder_id) }}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No job orders found for this company.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <!-- Quick Stats -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-graph-up"></i> Quick Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Total Contacts:</strong>
+                    <span class="float-end badge bg-info">{{ contacts|length }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Active Job Orders:</strong>
+                    <span class="float-end badge bg-success">{{ active_jobs_count }}</span>
+                </div>
+                <div class="mb-3">
+                    <strong>Total Job Orders:</strong>
+                    <span class="float-end badge bg-primary">{{ joborders|length }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity History -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                {% if activities %}
+                <div class="list-group list-group-flush">
+                    {% for activity in activities[:10] %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex w-100 justify-content-between">
+                            <small class="text-muted">{{ activity.type_description }}</small>
+                            <small class="text-muted">{{ activity.date_created.strftime('%Y-%m-%d') }}</small>
+                        </div>
+                        <p class="mb-1 small">{{ activity.notes[:100] }}{% if activity.notes|length > 100 %}...{% endif %}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted small">No recent activity</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete {{ company.name }}? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{{ url_for('companies.delete', company_id=company.company_id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

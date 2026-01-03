@@ -1,0 +1,43 @@
+{% extends "email/base.html" %}
+
+{% block title %}Interview Scheduled{% endblock %}
+
+{% block header %}Interview Scheduled{% endblock %}
+
+{% block content %}
+<h2>Interview Scheduled</h2>
+
+<p>An interview has been scheduled for a candidate.</p>
+
+<div class="info-box">
+    <strong>Interview Details:</strong><br>
+    <strong>Candidate:</strong> {{ candidate.first_name }} {{ candidate.last_name }}<br>
+    <strong>Position:</strong> {{ job.title }}<br>
+    <strong>Company:</strong> {{ company.name }}<br>
+    {% if interview_date %}
+    <strong>Date & Time:</strong> {{ interview_date }}<br>
+    {% endif %}
+    {% if interview_type %}
+    <strong>Interview Type:</strong> {{ interview_type }}<br>
+    {% endif %}
+    {% if location %}
+    <strong>Location:</strong> {{ location }}<br>
+    {% endif %}
+</div>
+
+{% if notes %}
+<p><strong>Additional Notes:</strong></p>
+<div style="background-color: #fff; padding: 15px; border-radius: 5px; margin: 15px 0;">
+    {{ notes }}
+</div>
+{% endif %}
+
+<p>View full details and update the candidate pipeline:</p>
+
+<center>
+    <a href="{{ candidate_url }}" class="button">View Candidate Details</a>
+</center>
+
+<p>Best regards,<br>
+The {{ site_name }} Team</p>
+{% endblock %}

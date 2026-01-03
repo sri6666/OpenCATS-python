@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}{{ contact.first_name }} {{ contact.last_name }} - OpenCATS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="bi bi-person"></i> {{ contact.first_name }} {{ contact.last_name }}
+        {% if contact.is_hot %}
+        <span class="badge bg-danger">Hot</span>
+        {% endif %}
+        {% if contact.left_company %}
+        <span class="badge bg-warning">Left Company</span>
+        {% endif %}
+    </h2>
+    <div class="btn-group">
+        <a href="{{ url_for('contacts.edit', contact_id=contact.contact_id) }}" class="btn btn-primary">
+            <i class="bi bi-pencil"></i> Edit
+        </a>
+        <a href="mailto:{{ contact.email1 }}" class="btn btn-info">
+            <i class="bi bi-envelope"></i> Email
+        </a>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+            <i class="bi bi-trash"></i> Delete
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Contact Information -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Contact Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Full Name:</strong>
+                        <p>{{ contact.first_name }} {{ contact.last_name }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Title:</strong>
+                        <p>{{ contact.title or '-' }}</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Company:</strong>
+                        <p>
+                            {% if contact.company %}
+                            <a href="{{ url_for('companies.view', company_id=contact.company_id) }}">
+                                {{ contact.company.name }}
+                            </a>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% if contact.reports_to_contact %}
+                    <div class="col-md-6">
+                        <strong>Reports To:</strong>
+                        <p>
+                            <a href="{{ url_for('contacts.view', contact_id=contact.reports_to) }}">
+                                {{ contact.reports_to_contact.first_name }} {{ contact.reports_to_contact.last_name }}
+                            </a>
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Primary Email:</strong>
+                        <p>
+                            {% if contact.email1 %}
+                            <a href="mailto:{{ contact.email1 }}">{{ contact.email1 }}</a>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Secondary Email:</strong>
+                        <p>
+                            {% if contact.email2 %}
+                            <a href="mailto:{{ contact.email2 }}">{{ contact.email2 }}</a>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Work Phone:</strong>
+                        <p>{{ contact.phone_work or '-' }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Cell Phone:</strong>
+                        <p>{{ contact.phone_cell or '-' }}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Other Phone:</strong>
+                        <p>{{ contact.phone_other or '-' }}</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <strong>Address:</strong>
+                        <p>
+                            {% if contact.address %}
+                            {{ contact.address }}<br>
+                            {% endif %}
+                            {% if contact.city or contact.state or contact.zip %}
+                            {{ contact.city }}{% if contact.state %}, {{ contact.state }}{% endif %} {{ contact.zip }}
+                            {% endif %}
+                            {% if not (contact.address or contact.city or contact.state or contact.zip) %}
+                            -
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                {% if contact.notes %}
+                <div class="row">
+                    <div class="col-12">
+                        <strong>Notes:</strong>
+                        <p>{{ contact.notes }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Associated Job Orders -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-briefcase"></i> Associated Job Orders ({{ joborders|length }})</h5>
+            </div>
+            <div class="card-body">
+                {% if joborders %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Company</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in joborders %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('joborders.view', joborder_id=job.joborder_id) }}">
+                                        {{ job.title }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if job.company %}
+                                    <a href="{{ url_for('companies.view', company_id=job.company_id) }}">
+                                        {{ job.company.name }}
+                                    </a>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if job.type == 'H' %}Full-Time
+                                    {% elif job.type == 'C' %}Contract
+                                    {% elif job.type == 'F' %}Freelance
+                                    {% elif job.type == 'P' %}Part-Time
+                                    {% else %}{{ job.type }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if job.status == 0 %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ job.date_created.strftime('%Y-%m-%d') }}</td>
+                                <td>
+                                    <a href="{{ url_for('joborders.view', joborder_id=job.joborder_id) }}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No job orders associated with this contact.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <!-- Quick Actions -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-lightning"></i> Quick Actions</h5>
+            </div>
+            <div class="card-body d-grid gap-2">
+                <a href="mailto:{{ contact.email1 }}" class="btn btn-outline-primary">
+                    <i class="bi bi-envelope"></i> Send Email
+                </a>
+                <a href="tel:{{ contact.phone_work }}" class="btn btn-outline-success">
+                    <i class="bi bi-telephone"></i> Call Work
+                </a>
+                <a href="tel:{{ contact.phone_cell }}" class="btn btn-outline-success">
+                    <i class="bi bi-phone"></i> Call Cell
+                </a>
+                <a href="{{ url_for('contacts.edit', contact_id=contact.contact_id) }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-pencil"></i> Edit Contact
+                </a>
+            </div>
+        </div>
+
+        <!-- Activity History -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                {% if activities %}
+                <div class="list-group list-group-flush">
+                    {% for activity in activities[:10] %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex w-100 justify-content-between">
+                            <small class="text-muted">{{ activity.type_description }}</small>
+                            <small class="text-muted">{{ activity.date_created.strftime('%Y-%m-%d') }}</small>
+                        </div>
+                        <p class="mb-1 small">{{ activity.notes[:100] }}{% if activity.notes|length > 100 %}...{% endif %}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted small">No recent activity</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete {{ contact.first_name }} {{ contact.last_name }}? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{{ url_for('contacts.delete', contact_id=contact.contact_id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

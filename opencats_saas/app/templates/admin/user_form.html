@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}{% if user %}Edit{% else %}Add{% endif %} User - OpenCATS Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="bi bi-person-plus"></i> {% if user %}Edit{% else %}Add New{% endif %} User
+            </h2>
+            <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Users
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {{ form.hidden_tag() }}
+
+                    <!-- Account Information -->
+                    <h5 class="mb-3 border-bottom pb-2">Account Information</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="username" class="form-label">Username *</label>
+                            {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""),
+                               readonly=user is not none) }}
+                            {% if form.username.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.username.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if user %}
+                            <small class="form-text text-muted">Username cannot be changed</small>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email *</label>
+                            {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else "")) }}
+                            {% if form.email.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.email.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="password" class="form-label">
+                                Password {% if not user %}*{% else %}(leave blank to keep current){% endif %}
+                            </label>
+                            {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else "")) }}
+                            {% if form.password.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.password.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="password_confirm" class="form-label">
+                                Confirm Password {% if not user %}*{% endif %}
+                            </label>
+                            {{ form.password_confirm(class="form-control" + (" is-invalid" if form.password_confirm.errors else "")) }}
+                            {% if form.password_confirm.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.password_confirm.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Personal Information -->
+                    <h5 class="mb-3 mt-4 border-bottom pb-2">Personal Information</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="first_name" class="form-label">First Name</label>
+                            {{ form.first_name(class="form-control") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            {{ form.last_name(class="form-control") }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="title" class="form-label">Title/Position</label>
+                            {{ form.title(class="form-control", placeholder="e.g., Recruiter, Manager") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="phone_work" class="form-label">Work Phone</label>
+                            {{ form.phone_work(class="form-control", placeholder="555-0100") }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phone_cell" class="form-label">Cell Phone</label>
+                        {{ form.phone_cell(class="form-control", placeholder="555-0101") }}
+                    </div>
+
+                    <!-- Access Control -->
+                    <h5 class="mb-3 mt-4 border-bottom pb-2">Access Control</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="access_level" class="form-label">Access Level *</label>
+                            {{ form.access_level(class="form-select" + (" is-invalid" if form.access_level.errors else "")) }}
+                            {% if form.access_level.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.access_level.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                <strong>100:</strong> Read Only |
+                                <strong>200:</strong> Edit |
+                                <strong>300:</strong> Delete |
+                                <strong>400:</strong> Admin |
+                                <strong>500:</strong> Root
+                            </small>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Status</label>
+                            <div class="form-check form-switch mt-2">
+                                {{ form.is_active(class="form-check-input") }}
+                                <label class="form-check-label" for="is_active">Account Active</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preferences -->
+                    <h5 class="mb-3 mt-4 border-bottom pb-2">Preferences</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="timezone" class="form-label">Timezone</label>
+                            {{ form.timezone(class="form-select") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="items_per_page" class="form-label">Items Per Page</label>
+                            {{ form.items_per_page(class="form-control", type="number", min="10", max="100") }}
+                        </div>
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        {{ form.date_format_dmy(class="form-check-input") }}
+                        <label class="form-check-label" for="date_format_dmy">
+                            Use Day/Month/Year date format (DD/MM/YYYY)
+                        </label>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{{ url_for('admin.users') }}" class="btn btn-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> {% if user %}Update{% else %}Create{% endif %} User
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Help Panel -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-question-circle"></i> Access Level Guide</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-3">Read Only (100)</dt>
+                    <dd class="col-sm-9">Can view all data but cannot make any changes</dd>
+
+                    <dt class="col-sm-3">Edit (200)</dt>
+                    <dd class="col-sm-9">Can create and modify records they own</dd>
+
+                    <dt class="col-sm-3">Delete (300)</dt>
+                    <dd class="col-sm-9">Can delete records in addition to creating and editing</dd>
+
+                    <dt class="col-sm-3">Admin (400)</dt>
+                    <dd class="col-sm-9">Full access to all features except site settings</dd>
+
+                    <dt class="col-sm-3">Root (500)</dt>
+                    <dd class="col-sm-9">Complete system access including site settings and billing</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

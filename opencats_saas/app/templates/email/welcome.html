@@ -1,0 +1,35 @@
+{% extends "email/base.html" %}
+
+{% block title %}Welcome to OpenCATS{% endblock %}
+
+{% block header %}Welcome to OpenCATS!{% endblock %}
+
+{% block content %}
+<h2>Hi {{ user.first_name or user.username }},</h2>
+
+<p>Welcome to <strong>{{ site_name }}</strong>! Your account has been successfully created.</p>
+
+<div class="info-box">
+    <strong>Your Account Details:</strong><br>
+    <strong>Username:</strong> {{ user.username }}<br>
+    <strong>Email:</strong> {{ user.email }}<br>
+    <strong>Access Level:</strong>
+    {% if user.access_level >= 500 %}Root (Full Access)
+    {% elif user.access_level >= 400 %}Admin
+    {% elif user.access_level >= 300 %}Delete Permissions
+    {% elif user.access_level >= 200 %}Edit Permissions
+    {% else %}Read Only
+    {% endif %}
+</div>
+
+<p>To get started, click the button below to log in to your account:</p>
+
+<center>
+    <a href="{{ login_url }}" class="button">Log In to OpenCATS</a>
+</center>
+
+<p>If you have any questions or need assistance, please don't hesitate to contact your administrator.</p>
+
+<p>Best regards,<br>
+The {{ site_name }} Team</p>
+{% endblock %}

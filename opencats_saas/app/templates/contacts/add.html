@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}{% if contact %}Edit{% else %}Add{% endif %} Contact - OpenCATS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="bi bi-person"></i> {% if contact %}Edit{% else %}Add New{% endif %} Contact
+            </h2>
+            <a href="{{ url_for('contacts.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Contacts
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {{ form.hidden_tag() }}
+
+                    <!-- Personal Information -->
+                    <h5 class="mb-3 border-bottom pb-2">Personal Information</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-5">
+                            <label for="first_name" class="form-label">First Name *</label>
+                            {{ form.first_name(class="form-control" + (" is-invalid" if form.first_name.errors else "")) }}
+                            {% if form.first_name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.first_name.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-5">
+                            <label for="last_name" class="form-label">Last Name *</label>
+                            {{ form.last_name(class="form-control" + (" is-invalid" if form.last_name.errors else "")) }}
+                            {% if form.last_name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.last_name.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Status</label>
+                            <div class="form-check form-switch mt-2">
+                                {{ form.is_hot(class="form-check-input") }}
+                                <label class="form-check-label" for="is_hot">Hot</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title/Position</label>
+                        {{ form.title(class="form-control", placeholder="e.g., HR Manager, CEO, etc.") }}
+                    </div>
+
+                    <!-- Company Information -->
+                    <h5 class="mb-3 mt-4 border-bottom pb-2">Company Information</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label for="company_id" class="form-label">Company *</label>
+                            {{ form.company_id(class="form-select" + (" is-invalid" if form.company_id.errors else "")) }}
+                            {% if form.company_id.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.company_id.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="left_company" class="form-label d-block">Status</label>
+                            <div class="form-check form-switch mt-2">
+                                {{ form.left_company(class="form-check-input") }}
+                                <label class="form-check-label" for="left_company">Left Company</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reports_to" class="form-label">Reports To</label>
+                        {{ form.reports_to(class="form-select") }}
+                        <small class="form-text text-muted">Select the contact this person reports to (if applicable)</small>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <h5 class="mb-3 mt-4 border-bottom pb-2">Contact Information</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="email1" class="form-label">Primary Email *</label>
+                            {{ form.email1(class="form-control" + (" is-invalid" if form.email1.errors else ""),
+                               placeholder="john.doe@example.com") }}
+                            {% if form.email1.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.email1.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email2" class="form-label">Secondary Email</label>
+                            {{ form.email2(class="form-control", placeholder="john.doe@personal.com") }}
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="phone_work" class="form-label">Work Phone</label>
+                            {{ form.phone_work(class="form-control", placeholder="555-0100") }}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="phone_cell" class="form-label">Cell Phone</label>
+                            {{ form.phone_cell(class="form-control", placeholder="555-0101") }}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="phone_other" class="form-label">Other Phone</label>
+                            {{ form.phone_other(class="form-control", placeholder="555-0102") }}
+                        </div>
+                    </div>
+
+                    <!-- Address -->
+                    <h5 class="mb-3 mt-4 border-bottom pb-2">Address</h5>
+
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Street Address</label>
+                        {{ form.address(class="form-control", rows=2, placeholder="123 Main Street") }}
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="city" class="form-label">City</label>
+                            {{ form.city(class="form-control", placeholder="San Francisco") }}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="state" class="form-label">State/Province</label>
+                            {{ form.state(class="form-control", placeholder="CA") }}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="zip" class="form-label">ZIP/Postal Code</label>
+                            {{ form.zip(class="form-control", placeholder="94105") }}
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <h5 class="mb-3 mt-4 border-bottom pb-2">Additional Information</h5>
+
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Internal Notes</label>
+                        {{ form.notes(class="form-control", rows=4,
+                           placeholder="Any internal notes about this contact...") }}
+                        <small class="form-text text-muted">
+                            These notes are for internal use only and will not be shared
+                        </small>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{{ url_for('contacts.index') }}" class="btn btn-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> {% if contact %}Update{% else %}Create{% endif %} Contact
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Companies - OpenCATS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="bi bi-building"></i> Companies
+    </h2>
+    <a href="{{ url_for('companies.add') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Add Company
+    </a>
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Search companies..."
+                       value="{{ request.args.get('search', '') }}">
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="hot" {% if request.args.get('status') == 'hot' %}selected{% endif %}>Hot Only</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input type="text" name="city" class="form-control" placeholder="City"
+                       value="{{ request.args.get('city', '') }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Companies Table -->
+{% if companies.items %}
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>City</th>
+                        <th>State</th>
+                        <th>Phone</th>
+                        <th>Active Jobs</th>
+                        <th>Contacts</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for company in companies.items %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('companies.view', company_id=company.company_id) }}" class="text-decoration-none">
+                                <strong>{{ company.name }}</strong>
+                            </a>
+                            {% if company.is_hot %}
+                            <span class="badge bg-danger ms-1">Hot</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ company.city or '-' }}</td>
+                        <td>{{ company.state or '-' }}</td>
+                        <td>{{ company.phone1 or '-' }}</td>
+                        <td>
+                            <span class="badge bg-success">{{ company.active_jobs_count or 0 }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ company.contacts_count or 0 }}</span>
+                        </td>
+                        <td>
+                            {% if company.is_hot %}
+                            <span class="badge bg-danger">Hot</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Active</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('companies.view', company_id=company.company_id) }}"
+                                   class="btn btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('companies.edit', company_id=company.company_id) }}"
+                                   class="btn btn-outline-secondary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if companies.pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if companies.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('companies.index', page=companies.prev_num, **request.args) }}">
+                        Previous
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for page_num in companies.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        <li class="page-item {% if page_num == companies.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('companies.index', page=page_num, **request.args) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if companies.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('companies.index', page=companies.next_num, **request.args) }}">
+                        Next
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> No companies found. <a href="{{ url_for('companies.add') }}">Add your first company</a>
+</div>
+{% endif %}
+
+{% endblock %}

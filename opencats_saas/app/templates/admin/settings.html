@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block title %}Site Settings - OpenCATS Admin{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">
+    <i class="bi bi-gear-fill"></i> Site Settings
+</h2>
+
+<div class="row">
+    <!-- General Settings -->
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-building"></i> General Settings</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('admin.update_settings') }}" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Organization Name *</label>
+                        {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                        {% if form.name.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.name.errors %}{{ error }}{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="subdomain" class="form-label">Subdomain</label>
+                        <div class="input-group">
+                            {{ form.subdomain(class="form-control", readonly=true) }}
+                            <span class="input-group-text">.opencats.com</span>
+                        </div>
+                        <small class="form-text text-muted">Contact support to change your subdomain</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="custom_domain" class="form-label">Custom Domain</label>
+                        {{ form.custom_domain(class="form-control", placeholder="recruiting.yourcompany.com") }}
+                        <small class="form-text text-muted">
+                            Available on Enterprise plan. Point your CNAME record to: {{ current_site.subdomain }}.opencats.com
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="logo" class="form-label">Company Logo</label>
+                        {{ form.logo(class="form-control") }}
+                        <small class="form-text text-muted">Upload a logo (PNG, JPG, max 2MB, recommended 200x200px)</small>
+                        {% if current_site.logo_url %}
+                        <div class="mt-2">
+                            <img src="{{ current_site.logo_url }}" alt="Current logo" style="max-height: 100px;">
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="timezone" class="form-label">Default Timezone</label>
+                            {{ form.timezone(class="form-select") }}
+                        </div>
+                        <div class="col-md-6">
+                            <label for="date_format" class="form-label">Date Format</label>
+                            {{ form.date_format(class="form-select") }}
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Save Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- API Settings (Enterprise Plan) -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-code-square"></i> API Access</h5>
+            </div>
+            <div class="card-body">
+                {% if current_site.subscription_plan == 'enterprise' %}
+                <div class="mb-3">
+                    <label class="form-label">API Key</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="{{ current_site.api_key or 'Not generated' }}" readonly>
+                        {% if current_site.api_key %}
+                        <button class="btn btn-outline-danger" type="button"
+                                data-bs-toggle="modal" data-bs-target="#regenerateApiKeyModal">
+                            <i class="bi bi-arrow-repeat"></i> Regenerate
+                        </button>
+                        {% else %}
+                        <button class="btn btn-outline-primary" type="button"
+                                onclick="document.getElementById('generateApiKeyForm').submit()">
+                            <i class="bi bi-key"></i> Generate
+                        </button>
+                        {% endif %}
+                    </div>
+                    <small class="form-text text-muted">
+                        Use this key for API authentication. Keep it secret!
+                    </small>
+                </div>
+
+                <form id="generateApiKeyForm" method="post" action="{{ url_for('admin.generate_api_key') }}" style="display: none;">
+                </form>
+
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Security Warning:</strong> Keep your API key confidential. Do not share it or commit it to version control.
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    API access is available on the <strong>Enterprise</strong> plan.
+                    <a href="{{ url_for('billing.plans') }}">Upgrade now</a> to enable API access.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <!-- Subscription Info -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-credit-card"></i> Subscription</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-5">Plan:</dt>
+                    <dd class="col-sm-7">
+                        <span class="badge
+                            {% if current_site.subscription_plan == 'enterprise' %}bg-primary
+                            {% elif current_site.subscription_plan == 'professional' %}bg-success
+                            {% else %}bg-secondary{% endif %}">
+                            {{ current_site.subscription_plan|capitalize }}
+                        </span>
+                    </dd>
+
+                    <dt class="col-sm-5">Status:</dt>
+                    <dd class="col-sm-7">
+                        <span class="badge
+                            {% if current_site.subscription_status == 'active' %}bg-success
+                            {% elif current_site.subscription_status == 'trial' %}bg-info
+                            {% else %}bg-warning{% endif %}">
+                            {{ current_site.subscription_status|capitalize }}
+                        </span>
+                    </dd>
+
+                    {% if current_site.trial_ends_at and current_site.subscription_status == 'trial' %}
+                    <dt class="col-sm-5">Trial Ends:</dt>
+                    <dd class="col-sm-7">{{ current_site.trial_ends_at.strftime('%Y-%m-%d') }}</dd>
+                    {% endif %}
+
+                    {% if current_site.subscription_ends_at %}
+                    <dt class="col-sm-5">Renews:</dt>
+                    <dd class="col-sm-7">{{ current_site.subscription_ends_at.strftime('%Y-%m-%d') }}</dd>
+                    {% endif %}
+                </dl>
+
+                <div class="d-grid gap-2 mt-3">
+                    <a href="{{ url_for('billing.plans') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-arrow-up-circle"></i> Upgrade Plan
+                    </a>
+                    <a href="{{ url_for('billing.portal') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-gear"></i> Manage Billing
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usage Stats -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-graph-up"></i> Usage</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-2">
+                    <dt class="col-sm-7">Storage Used:</dt>
+                    <dd class="col-sm-5 text-end">
+                        {{ (current_site.storage_used_mb or 0)|round(2) }} MB
+                    </dd>
+                </dl>
+                <div class="progress mb-3" style="height: 20px;">
+                    {% set storage_percent = ((current_site.storage_used_mb or 0) / current_site.storage_limit_mb * 100)|round(0) %}
+                    <div class="progress-bar {% if storage_percent > 80 %}bg-danger{% elif storage_percent > 50 %}bg-warning{% else %}bg-success{% endif %}"
+                         role="progressbar"
+                         style="width: {{ storage_percent }}%"
+                         aria-valuenow="{{ storage_percent }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100">
+                        {{ storage_percent }}%
+                    </div>
+                </div>
+                <small class="text-muted">
+                    Limit: {{ (current_site.storage_limit_mb / 1024)|round(1) }} GB
+                </small>
+
+                <hr>
+
+                <dl class="row mb-0 small">
+                    <dt class="col-sm-7">Active Users:</dt>
+                    <dd class="col-sm-5 text-end">{{ stats.users }}</dd>
+
+                    <dt class="col-sm-7">Candidates:</dt>
+                    <dd class="col-sm-5 text-end">{{ stats.candidates }}</dd>
+
+                    <dt class="col-sm-7">Job Orders:</dt>
+                    <dd class="col-sm-5 text-end">{{ stats.jobs }}</dd>
+
+                    <dt class="col-sm-7">Companies:</dt>
+                    <dd class="col-sm-5 text-end">{{ stats.companies }}</dd>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Danger Zone -->
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Danger Zone</h5>
+            </div>
+            <div class="card-body">
+                <p class="small">Permanently delete this site and all associated data.</p>
+                <button class="btn btn-outline-danger btn-sm w-100" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                    <i class="bi bi-trash"></i> Delete Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Regenerate API Key Modal -->
+<div class="modal fade" id="regenerateApiKeyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Regenerate API Key</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>Warning:</strong> Regenerating your API key will invalidate the current key.
+                    Any applications using the old key will stop working.
+                </div>
+                Are you sure you want to regenerate your API key?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{{ url_for('admin.regenerate_api_key') }}" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Regenerate Key</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Delete Account - Final Warning</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>This action cannot be undone!</strong>
+                </div>
+                <p>Deleting your account will permanently remove:</p>
+                <ul>
+                    <li>All users and their data</li>
+                    <li>All candidates and resumes</li>
+                    <li>All job orders and applications</li>
+                    <li>All companies and contacts</li>
+                    <li>All uploaded files</li>
+                </ul>
+                <p>Your subscription will be canceled and you will not be charged again.</p>
+                <p><strong>Type <code>DELETE</code> to confirm:</strong></p>
+                <input type="text" id="deleteConfirm" class="form-control" placeholder="Type DELETE">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{{ url_for('admin.delete_account') }}" style="display: inline;">
+                    <button type="submit" class="btn btn-danger" id="deleteAccountBtn" disabled>
+                        Delete My Account Forever
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('deleteConfirm').addEventListener('input', function(e) {
+    document.getElementById('deleteAccountBtn').disabled = (e.target.value !== 'DELETE');
+});
+</script>
+
+{% endblock %}

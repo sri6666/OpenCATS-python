@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}User Management - OpenCATS Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="bi bi-people-fill"></i> User Management
+    </h2>
+    {% if can_add_users %}
+    <a href="{{ url_for('admin.add_user') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Add User
+    </a>
+    {% else %}
+    <button class="btn btn-secondary" disabled title="Upgrade your plan to add more users">
+        <i class="bi bi-lock"></i> Upgrade to Add Users
+    </button>
+    {% endif %}
+</div>
+
+<!-- Plan Limits Info -->
+<div class="alert alert-info mb-4">
+    <i class="bi bi-info-circle"></i>
+    Current Plan: <strong>{{ current_site.subscription_plan|capitalize }}</strong> |
+    Users: <strong>{{ users.total }}/{{ max_users if max_users != -1 else '∞' }}</strong>
+    {% if max_users != -1 and users.total >= max_users %}
+    <span class="text-danger ms-2">
+        <i class="bi bi-exclamation-triangle"></i> User limit reached.
+        <a href="{{ url_for('billing.plans') }}">Upgrade your plan</a> to add more users.
+    </span>
+    {% endif %}
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Search users..."
+                       value="{{ request.args.get('search', '') }}">
+            </div>
+            <div class="col-md-3">
+                <select name="access_level" class="form-select">
+                    <option value="">All Access Levels</option>
+                    <option value="100" {% if request.args.get('access_level') == '100' %}selected{% endif %}>Read Only (100)</option>
+                    <option value="200" {% if request.args.get('access_level') == '200' %}selected{% endif %}>Edit (200)</option>
+                    <option value="300" {% if request.args.get('access_level') == '300' %}selected{% endif %}>Delete (300)</option>
+                    <option value="400" {% if request.args.get('access_level') == '400' %}selected{% endif %}>Admin (400)</option>
+                    <option value="500" {% if request.args.get('access_level') == '500' %}selected{% endif %}>Root (500)</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="active" {% if request.args.get('status') == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if request.args.get('status') == 'inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Users Table -->
+{% if users.items %}
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Access Level</th>
+                        <th>Status</th>
+                        <th>Last Login</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users.items %}
+                    <tr>
+                        <td>
+                            <strong>{{ user.username }}</strong>
+                            {% if user.is_root %}
+                            <span class="badge bg-danger ms-1">ROOT</span>
+                            {% elif user.is_admin %}
+                            <span class="badge bg-warning ms-1">ADMIN</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.full_name }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if user.access_level >= 500 %}
+                            <span class="badge bg-danger">Root (500)</span>
+                            {% elif user.access_level >= 400 %}
+                            <span class="badge bg-warning">Admin (400)</span>
+                            {% elif user.access_level >= 300 %}
+                            <span class="badge bg-info">Delete (300)</span>
+                            {% elif user.access_level >= 200 %}
+                            <span class="badge bg-success">Edit (200)</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Read (100)</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.is_active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.last_login %}
+                            {{ user.last_login.strftime('%Y-%m-%d %H:%M') }}
+                            {% else %}
+                            <span class="text-muted">Never</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('admin.edit_user', user_id=user.user_id) }}"
+                                   class="btn btn-outline-primary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% if not user.is_root or (current_user.is_root and user.user_id != current_user.user_id) %}
+                                <button type="button" class="btn btn-outline-danger"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal{{ user.user_id }}"
+                                        title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Delete Modal for each user -->
+                    <div class="modal fade" id="deleteModal{{ user.user_id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Confirm Delete</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Are you sure you want to delete user <strong>{{ user.username }}</strong>? This action cannot be undone.
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <form method="post" action="{{ url_for('admin.delete_user', user_id=user.user_id) }}" style="display: inline;">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if users.pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if users.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin.users', page=users.prev_num, **request.args) }}">
+                        Previous
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for page_num in users.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        <li class="page-item {% if page_num == users.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('admin.users', page=page_num, **request.args) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if users.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('admin.users', page=users.next_num, **request.args) }}">
+                        Next
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> No users found.
+</div>
+{% endif %}
+
+<!-- Access Level Reference -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-shield-check"></i> Access Level Reference</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <strong>100 - Read Only:</strong> Can view data but not edit
+            </div>
+            <div class="col-md-4">
+                <strong>200 - Edit:</strong> Can create and edit records
+            </div>
+            <div class="col-md-4">
+                <strong>300 - Delete:</strong> Can delete records
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-4">
+                <strong>400 - Admin:</strong> Full administrative access
+            </div>
+            <div class="col-md-4">
+                <strong>500 - Root:</strong> Complete system access
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

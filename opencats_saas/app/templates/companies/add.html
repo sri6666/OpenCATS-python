@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}{% if company %}Edit{% else %}Add{% endif %} Company - OpenCATS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>
+                <i class="bi bi-building"></i> {% if company %}Edit{% else %}Add New{% endif %} Company
+            </h2>
+            <a href="{{ url_for('companies.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Companies
+            </a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+
+                    <!-- Company Information -->
+                    <h5 class="mb-3 border-bottom pb-2">Company Information</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label for="name" class="form-label">Company Name *</label>
+                            {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+                            {% if form.name.errors %}
+                            <div class="invalid-feedback">
+                                {% for error in form.name.errors %}{{ error }}{% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="is_hot" class="form-label">Status</label>
+                            <div class="form-check form-switch mt-2">
+                                {{ form.is_hot(class="form-check-input") }}
+                                <label class="form-check-label" for="is_hot">Mark as Hot</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="url" class="form-label">Website</label>
+                        {{ form.url(class="form-control", placeholder="https://example.com") }}
+                    </div>
+
+                    <!-- Contact Information -->
+                    <h5 class="mb-3 mt-4 border-bottom pb-2">Contact Information</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="phone1" class="form-label">Primary Phone</label>
+                            {{ form.phone1(class="form-control", placeholder="555-0100") }}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="phone2" class="form-label">Secondary Phone</label>
+                            {{ form.phone2(class="form-control", placeholder="555-0101") }}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="fax" class="form-label">Fax</label>
+                            {{ form.fax(class="form-control", placeholder="555-0102") }}
+                        </div>
+                    </div>
+
+                    <!-- Address -->
+                    <h5 class="mb-3 mt-4 border-bottom pb-2">Address</h5>
+
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Street Address</label>
+                        {{ form.address(class="form-control", rows=2, placeholder="123 Main Street") }}
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="city" class="form-label">City</label>
+                            {{ form.city(class="form-control", placeholder="San Francisco") }}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="state" class="form-label">State/Province</label>
+                            {{ form.state(class="form-control", placeholder="CA") }}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="zip" class="form-label">ZIP/Postal Code</label>
+                            {{ form.zip(class="form-control", placeholder="94105") }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="country" class="form-label">Country</label>
+                        {{ form.country(class="form-control", placeholder="United States") }}
+                    </div>
+
+                    <!-- Additional Information -->
+                    <h5 class="mb-3 mt-4 border-bottom pb-2">Additional Information</h5>
+
+                    <div class="mb-3">
+                        <label for="key_technologies" class="form-label">Key Technologies</label>
+                        {{ form.key_technologies(class="form-control", rows=2,
+                           placeholder="Python, Java, AWS, React, etc.") }}
+                        <small class="form-text text-muted">
+                            Comma-separated list of technologies this company uses or specializes in
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Internal Notes</label>
+                        {{ form.notes(class="form-control", rows=4,
+                           placeholder="Any internal notes about this company...") }}
+                        <small class="form-text text-muted">
+                            These notes are for internal use only and will not be shared
+                        </small>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{{ url_for('companies.index') }}" class="btn btn-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> {% if company %}Update{% else %}Create{% endif %} Company
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

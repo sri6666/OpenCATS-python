@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Contacts - OpenCATS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="bi bi-people"></i> Contacts
+    </h2>
+    <a href="{{ url_for('contacts.add') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Add Contact
+    </a>
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Search contacts..."
+                       value="{{ request.args.get('search', '') }}">
+            </div>
+            <div class="col-md-3">
+                <select name="company_id" class="form-select">
+                    <option value="">All Companies</option>
+                    {% for company in companies %}
+                    <option value="{{ company.company_id }}"
+                            {% if request.args.get('company_id') == company.company_id|string %}selected{% endif %}>
+                        {{ company.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="hot" {% if request.args.get('status') == 'hot' %}selected{% endif %}>Hot Only</option>
+                    <option value="active" {% if request.args.get('status') == 'active' %}selected{% endif %}>Active</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Contacts Table -->
+{% if contacts.items %}
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Title</th>
+                        <th>Company</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contact in contacts.items %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('contacts.view', contact_id=contact.contact_id) }}" class="text-decoration-none">
+                                <strong>{{ contact.first_name }} {{ contact.last_name }}</strong>
+                            </a>
+                            {% if contact.is_hot %}
+                            <span class="badge bg-danger ms-1">Hot</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ contact.title or '-' }}</td>
+                        <td>
+                            {% if contact.company %}
+                            <a href="{{ url_for('companies.view', company_id=contact.company_id) }}">
+                                {{ contact.company.name }}
+                            </a>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>{{ contact.email1 or '-' }}</td>
+                        <td>{{ contact.phone_work or contact.phone_cell or '-' }}</td>
+                        <td>
+                            {% if contact.is_hot %}
+                            <span class="badge bg-danger">Hot</span>
+                            {% elif contact.left_company %}
+                            <span class="badge bg-warning">Left Company</span>
+                            {% else %}
+                            <span class="badge bg-success">Active</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('contacts.view', contact_id=contact.contact_id) }}"
+                                   class="btn btn-outline-primary" title="View">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('contacts.edit', contact_id=contact.contact_id) }}"
+                                   class="btn btn-outline-secondary" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="mailto:{{ contact.email1 }}" class="btn btn-outline-info" title="Email">
+                                    <i class="bi bi-envelope"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if contacts.pages > 1 %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if contacts.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('contacts.index', page=contacts.prev_num, **request.args) }}">
+                        Previous
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for page_num in contacts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        <li class="page-item {% if page_num == contacts.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('contacts.index', page=page_num, **request.args) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if contacts.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('contacts.index', page=contacts.next_num, **request.args) }}">
+                        Next
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> No contacts found. <a href="{{ url_for('contacts.add') }}">Add your first contact</a>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "email/base.html" %}
+
+{% block title %}New Candidate Added{% endblock %}
+
+{% block header %}New Candidate Added{% endblock %}
+
+{% block content %}
+<h2>New Candidate Notification</h2>
+
+<p>A new candidate has been added to the system by {{ added_by.full_name }}.</p>
+
+<div class="info-box">
+    <strong>Candidate Information:</strong><br>
+    <strong>Name:</strong> {{ candidate.first_name }} {{ candidate.last_name }}<br>
+    <strong>Email:</strong> {{ candidate.email1 or 'Not provided' }}<br>
+    <strong>Phone:</strong> {{ candidate.phone_cell or candidate.phone_home or 'Not provided' }}<br>
+    {% if candidate.key_skills %}
+    <strong>Skills:</strong> {{ candidate.key_skills }}<br>
+    {% endif %}
+    {% if candidate.current_employer %}
+    <strong>Current Employer:</strong> {{ candidate.current_employer }}<br>
+    {% endif %}
+    {% if candidate.is_hot %}
+    <strong>Status:</strong> <span style="color: #dc3545;">HOT CANDIDATE 🔥</span><br>
+    {% endif %}
+</div>
+
+<p>View the full candidate profile and resume:</p>
+
+<center>
+    <a href="{{ candidate_url }}" class="button">View Candidate Profile</a>
+</center>
+
+<p>Best regards,<br>
+The {{ site_name }} Team</p>
+{% endblock %}
