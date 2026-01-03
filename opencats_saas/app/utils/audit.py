@@ -5,16 +5,18 @@ from app.models import Activity
 from app.extensions import db
 
 
-def log_login(user_id, ip_address, user_agent):
+def log_login(user, ip_address, user_agent):
     """Log user login activity"""
     # Simple implementation - just create an activity record
     # In production, you might want a dedicated audit_log table
     try:
         activity = Activity(
-            data_item_id=user_id,
+            site_id=user.site_id,
+            data_item_id=user.user_id,
             data_item_type=1,  # User
             type=100,  # Login
-            entered_by=user_id,
+            entered_by=user.user_id,
+            owner=user.user_id,
             notes=f'Login from {ip_address}'
         )
         db.session.add(activity)

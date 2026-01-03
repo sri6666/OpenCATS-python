@@ -53,7 +53,7 @@ def login():
 
         # Log login activity
         from app.utils.audit import log_login
-        log_login(user.user_id, request.remote_addr, request.user_agent.string)
+        log_login(user, request.remote_addr, request.user_agent.string)
 
         # Redirect to next page or dashboard
         next_page = request.args.get('next')

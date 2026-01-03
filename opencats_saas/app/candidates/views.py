@@ -79,7 +79,7 @@ def index():
 @permission_required('candidates.view')
 def show(id):
     """Show candidate details"""
-    candidate = Candidate.query_for_site(current_user.site_id).get_or_404(id)
+    candidate = Candidate.query_for_site(current_user.site_id).filter_by(candidate_id=id).first_or_404()
 
     if candidate.is_admin_hidden:
         flash('Candidate not found.', 'warning')
@@ -98,7 +98,7 @@ def show(id):
         data_item_id=candidate.candidate_id
     ).order_by(Activity.date_created.desc()).limit(10).all()
 
-    return render_template('candidates/show.html',
+    return render_template('candidates/view.html',
                          candidate=candidate,
                          pipeline_entries=pipeline_entries,
                          attachments=attachments,
@@ -157,7 +157,7 @@ def add():
 @permission_required('candidates.edit')
 def edit(id):
     """Edit candidate"""
-    candidate = Candidate.query_for_site(current_user.site_id).get_or_404(id)
+    candidate = Candidate.query_for_site(current_user.site_id).filter_by(candidate_id=id).first_or_404()
 
     if candidate.is_admin_hidden:
         flash('Candidate not found.', 'warning')
@@ -190,7 +190,7 @@ def edit(id):
 @permission_required('candidates.delete')
 def delete(id):
     """Delete (hide) candidate"""
-    candidate = Candidate.query_for_site(current_user.site_id).get_or_404(id)
+    candidate = Candidate.query_for_site(current_user.site_id).filter_by(candidate_id=id).first_or_404()
 
     # Soft delete
     candidate.is_admin_hidden = True
@@ -210,7 +210,7 @@ def delete(id):
 @permission_required('candidates.edit')
 def upload_resume(id):
     """Upload resume for candidate"""
-    candidate = Candidate.query_for_site(current_user.site_id).get_or_404(id)
+    candidate = Candidate.query_for_site(current_user.site_id).filter_by(candidate_id=id).first_or_404()
 
     if 'resume' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400

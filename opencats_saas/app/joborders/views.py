@@ -85,7 +85,7 @@ def index():
 @permission_required('joborders.view')
 def show(id):
     """Show job order details"""
-    joborder = JobOrder.query_for_site(current_user.site_id).get_or_404(id)
+    joborder = JobOrder.query_for_site(current_user.site_id).filter_by(joborder_id=id).first_or_404()
 
     if joborder.is_admin_hidden:
         flash('Job order not found.', 'warning')
@@ -161,7 +161,7 @@ def add():
 @permission_required('joborders.edit')
 def edit(id):
     """Edit job order"""
-    joborder = JobOrder.query_for_site(current_user.site_id).get_or_404(id)
+    joborder = JobOrder.query_for_site(current_user.site_id).filter_by(joborder_id=id).first_or_404()
 
     if joborder.is_admin_hidden:
         flash('Job order not found.', 'warning')
@@ -194,7 +194,7 @@ def edit(id):
 @permission_required('joborders.delete')
 def delete(id):
     """Delete (hide) job order"""
-    joborder = JobOrder.query_for_site(current_user.site_id).get_or_404(id)
+    joborder = JobOrder.query_for_site(current_user.site_id).filter_by(joborder_id=id).first_or_404()
 
     # Soft delete
     joborder.is_admin_hidden = True
@@ -214,7 +214,7 @@ def delete(id):
 @permission_required('joborders.view')
 def pipeline(id):
     """View pipeline for job order"""
-    joborder = JobOrder.query_for_site(current_user.site_id).get_or_404(id)
+    joborder = JobOrder.query_for_site(current_user.site_id).filter_by(joborder_id=id).first_or_404()
 
     # Get pipeline entries grouped by status
     pipeline_entries = joborder.pipeline_entries.all()
@@ -250,7 +250,7 @@ def pipeline(id):
 @permission_required('joborders.edit')
 def add_candidate(job_id):
     """Add candidate to pipeline"""
-    joborder = JobOrder.query_for_site(current_user.site_id).get_or_404(job_id)
+    joborder = JobOrder.query_for_site(current_user.site_id).filter_by(joborder_id=job_id).first_or_404()
     form = AddToPipelineForm()
 
     if form.validate_on_submit():
@@ -296,7 +296,7 @@ def add_candidate(job_id):
 @permission_required('joborders.edit')
 def update_status(entry_id):
     """Update pipeline entry status"""
-    entry = CandidateJobOrder.query_for_site(current_user.site_id).get_or_404(entry_id)
+    entry = CandidateJobOrder.query_for_site(current_user.site_id).filter_by(candidate_joborder_id=entry_id).first_or_404()
 
     new_status = request.json.get('status', type=int)
     if new_status is None:
@@ -341,7 +341,7 @@ def update_status(entry_id):
 @permission_required('joborders.edit')
 def update_rating(entry_id):
     """Update pipeline entry rating"""
-    entry = CandidateJobOrder.query_for_site(current_user.site_id).get_or_404(entry_id)
+    entry = CandidateJobOrder.query_for_site(current_user.site_id).filter_by(candidate_joborder_id=entry_id).first_or_404()
 
     rating = request.json.get('rating', type=int)
     if rating is None or rating < -6 or rating > 5:
@@ -363,7 +363,7 @@ def update_rating(entry_id):
 @permission_required('joborders.delete')
 def remove_from_pipeline(entry_id):
     """Remove candidate from pipeline"""
-    entry = CandidateJobOrder.query_for_site(current_user.site_id).get_or_404(entry_id)
+    entry = CandidateJobOrder.query_for_site(current_user.site_id).filter_by(candidate_joborder_id=entry_id).first_or_404()
 
     candidate_name = entry.candidate.full_name
     job_id = entry.joborder_id

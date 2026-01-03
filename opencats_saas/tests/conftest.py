@@ -211,7 +211,7 @@ def test_job(db_session, test_site, test_company, test_contact, admin_user):
 def auth_client(client, admin_user):
     """Create an authenticated client"""
     with client.session_transaction() as session:
-        session['user_id'] = admin_user.user_id
+        session['_user_id'] = str(admin_user.user_id)
         session['_fresh'] = True
     return client
 

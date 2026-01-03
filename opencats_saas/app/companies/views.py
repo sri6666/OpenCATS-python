@@ -62,7 +62,7 @@ def index():
 @permission_required('companies.view')
 def show(id):
     """Show company details"""
-    company = Company.query_for_site(current_user.site_id).get_or_404(id)
+    company = Company.query_for_site(current_user.site_id).filter_by(company_id=id).first_or_404()
 
     if company.is_admin_hidden:
         flash('Company not found.', 'warning')
@@ -78,7 +78,7 @@ def show(id):
         data_item_id=company.company_id
     ).order_by(Activity.date_created.desc()).limit(10).all()
 
-    return render_template('companies/show.html',
+    return render_template('companies/view.html',
                          company=company,
                          contacts=contacts,
                          joborders=joborders,
@@ -119,7 +119,7 @@ def add():
 @permission_required('companies.edit')
 def edit(id):
     """Edit company"""
-    company = Company.query_for_site(current_user.site_id).get_or_404(id)
+    company = Company.query_for_site(current_user.site_id).filter_by(company_id=id).first_or_404()
 
     if company.is_admin_hidden:
         flash('Company not found.', 'warning')
@@ -147,7 +147,7 @@ def edit(id):
 @permission_required('companies.delete')
 def delete(id):
     """Delete (hide) company"""
-    company = Company.query_for_site(current_user.site_id).get_or_404(id)
+    company = Company.query_for_site(current_user.site_id).filter_by(company_id=id).first_or_404()
 
     company.is_admin_hidden = True
     company.date_modified = datetime.utcnow()
@@ -166,7 +166,7 @@ def delete(id):
 @permission_required('companies.edit')
 def add_department(company_id):
     """Add department to company"""
-    company = Company.query_for_site(current_user.site_id).get_or_404(company_id)
+    company = Company.query_for_site(current_user.site_id).filter_by(company_id=company_id).first_or_404()
     form = DepartmentForm()
 
     if form.validate_on_submit():

@@ -75,7 +75,7 @@ def index():
 @permission_required('contacts.view')
 def show(id):
     """Show contact details"""
-    contact = Contact.query_for_site(current_user.site_id).get_or_404(id)
+    contact = Contact.query_for_site(current_user.site_id).filter_by(contact_id=id).first_or_404()
 
     # Load related data
     joborders = contact.joborders.filter_by(is_admin_hidden=False).order_by(JobOrder.date_modified.desc()).limit(10).all()
@@ -85,7 +85,7 @@ def show(id):
         data_item_id=contact.contact_id
     ).order_by(Activity.date_created.desc()).limit(10).all()
 
-    return render_template('contacts/show.html',
+    return render_template('contacts/view.html',
                          contact=contact,
                          joborders=joborders,
                          activities=activities)
@@ -129,7 +129,7 @@ def add():
 @permission_required('contacts.edit')
 def edit(id):
     """Edit contact"""
-    contact = Contact.query_for_site(current_user.site_id).get_or_404(id)
+    contact = Contact.query_for_site(current_user.site_id).filter_by(contact_id=id).first_or_404()
 
     form = ContactForm(obj=contact)
 
@@ -153,7 +153,7 @@ def edit(id):
 @permission_required('contacts.delete')
 def delete(id):
     """Delete contact"""
-    contact = Contact.query_for_site(current_user.site_id).get_or_404(id)
+    contact = Contact.query_for_site(current_user.site_id).filter_by(contact_id=id).first_or_404()
 
     db.session.delete(contact)
     db.session.commit()
