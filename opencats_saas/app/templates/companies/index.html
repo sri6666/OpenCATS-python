@@ -86,11 +86,11 @@
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm">
-                                <a href="{{ url_for('companies.view', company_id=company.company_id) }}"
+                                <a href="{{ url_for('companies.show', id=company.company_id) }}"
                                    class="btn btn-outline-primary" title="View">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="{{ url_for('companies.edit', company_id=company.company_id) }}"
+                                <a href="{{ url_for('companies.edit', id=company.company_id) }}"
                                    class="btn btn-outline-secondary" title="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>

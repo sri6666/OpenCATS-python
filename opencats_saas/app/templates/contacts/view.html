@@ -14,7 +14,7 @@
         {% endif %}
     </h2>
     <div class="btn-group">
-        <a href="{{ url_for('contacts.edit', contact_id=contact.contact_id) }}" class="btn btn-primary">
+        <a href="{{ url_for('contacts.edit', id=contact.contact_id) }}" class="btn btn-primary">
             <i class="bi bi-pencil"></i> Edit
         </a>
         <a href="mailto:{{ contact.email1 }}" class="btn btn-info">
@@ -223,7 +223,7 @@
                 <a href="tel:{{ contact.phone_cell }}" class="btn btn-outline-success">
                     <i class="bi bi-phone"></i> Call Cell
                 </a>
-                <a href="{{ url_for('contacts.edit', contact_id=contact.contact_id) }}" class="btn btn-outline-secondary">
+                <a href="{{ url_for('contacts.edit', id=contact.contact_id) }}" class="btn btn-outline-secondary">
                     <i class="bi bi-pencil"></i> Edit Contact
                 </a>
             </div>
