@@ -11,7 +11,7 @@ class TestAuthViews:
 
     def test_login_page_get(self, client):
         """Test GET /auth/login"""
-        response = client.get('/auth/login')
+        response = client.get('/auth/login', follow_redirects=True)
         assert response.status_code == 200
         assert b'Login' in response.data or b'login' in response.data
 
@@ -30,7 +30,7 @@ class TestAuthViews:
         response = client.post('/auth/login', data={
             'username': 'invalid',
             'password': 'wrong'
-        })
+        }, follow_redirects=True)
 
         assert response.status_code in [200, 401]
         assert b'Invalid' in response.data or b'incorrect' in response.data
@@ -46,13 +46,13 @@ class TestDashboardViews:
 
     def test_dashboard_requires_login(self, client):
         """Test that dashboard requires authentication"""
-        response = client.get('/dashboard')
+        response = client.get('/dashboard', follow_redirects=True)
         # Should redirect to login
         assert response.status_code in [302, 401]
 
     def test_dashboard_authenticated(self, auth_client):
         """Test dashboard with authenticated user"""
-        response = auth_client.get('/dashboard')
+        response = auth_client.get('/dashboard', follow_redirects=True)
         assert response.status_code == 200
         assert b'Dashboard' in response.data or b'dashboard' in response.data
 
@@ -62,12 +62,12 @@ class TestCandidateViews:
 
     def test_candidates_list(self, auth_client):
         """Test GET /candidates"""
-        response = auth_client.get('/candidates')
+        response = auth_client.get('/candidates', follow_redirects=True)
         assert response.status_code == 200
 
     def test_candidates_add_get(self, auth_client):
         """Test GET /candidates/add"""
-        response = auth_client.get('/candidates/add')
+        response = auth_client.get('/candidates/add', follow_redirects=True)
         assert response.status_code == 200
         assert b'Add' in response.data or b'New' in response.data
 
@@ -104,7 +104,7 @@ class TestCandidateViews:
 
     def test_candidate_search(self, auth_client, test_candidate):
         """Test candidate search functionality"""
-        response = auth_client.get('/candidates?search=Alice')
+        response = auth_client.get('/candidates?search=Alice', follow_redirects=True)
         assert response.status_code == 200
 
 
@@ -113,7 +113,7 @@ class TestJobOrderViews:
 
     def test_joborders_list(self, auth_client):
         """Test GET /joborders"""
-        response = auth_client.get('/joborders')
+        response = auth_client.get('/joborders', follow_redirects=True)
         assert response.status_code == 200
 
     def test_joborder_view(self, auth_client, test_job):
@@ -133,7 +133,7 @@ class TestCompanyViews:
 
     def test_companies_list(self, auth_client):
         """Test GET /companies"""
-        response = auth_client.get('/companies')
+        response = auth_client.get('/companies', follow_redirects=True)
         assert response.status_code == 200
 
     def test_company_view(self, auth_client, test_company):
@@ -144,7 +144,7 @@ class TestCompanyViews:
 
     def test_company_add_get(self, auth_client):
         """Test GET /companies/add"""
-        response = auth_client.get('/companies/add')
+        response = auth_client.get('/companies/add', follow_redirects=True)
         assert response.status_code == 200
 
     def test_company_add_post(self, auth_client, admin_user):
@@ -164,7 +164,7 @@ class TestContactViews:
 
     def test_contacts_list(self, auth_client):
         """Test GET /contacts"""
-        response = auth_client.get('/contacts')
+        response = auth_client.get('/contacts', follow_redirects=True)
         assert response.status_code == 200
 
     def test_contact_view(self, auth_client, test_contact):
@@ -176,7 +176,7 @@ class TestContactViews:
 
     def test_contact_add_get(self, auth_client):
         """Test GET /contacts/add"""
-        response = auth_client.get('/contacts/add')
+        response = auth_client.get('/contacts/add', follow_redirects=True)
         assert response.status_code == 200
 
 
@@ -185,12 +185,12 @@ class TestAdminViews:
 
     def test_admin_users_list(self, auth_client):
         """Test GET /admin/users"""
-        response = auth_client.get('/admin/users')
+        response = auth_client.get('/admin/users', follow_redirects=True)
         assert response.status_code == 200
 
     def test_admin_settings(self, auth_client):
         """Test GET /admin/settings"""
-        response = auth_client.get('/admin/settings')
+        response = auth_client.get('/admin/settings', follow_redirects=True)
         assert response.status_code == 200
 
     def test_admin_requires_permission(self, client, regular_user):
@@ -200,9 +200,9 @@ class TestAdminViews:
             client.post('/auth/login', data={
                 'username': 'user',
                 'password': 'user123'
-            })
+            }, follow_redirects=True)
 
-            response = client.get('/admin/users')
+            response = client.get('/admin/users', follow_redirects=True)
             # Should be forbidden or redirected
             assert response.status_code in [403, 302]
 
@@ -212,18 +212,18 @@ class TestBillingViews:
 
     def test_billing_plans(self, auth_client):
         """Test GET /billing/plans"""
-        response = auth_client.get('/billing/plans')
+        response = auth_client.get('/billing/plans', follow_redirects=True)
         assert response.status_code == 200
 
     def test_billing_checkout(self, auth_client):
         """Test GET /billing/checkout/<plan>"""
-        response = auth_client.get('/billing/checkout/professional')
+        response = auth_client.get('/billing/checkout/professional', follow_redirects=True)
         # May redirect to Stripe or show form
         assert response.status_code in [200, 302]
 
     def test_billing_portal(self, auth_client):
         """Test GET /billing/portal"""
-        response = auth_client.get('/billing/portal')
+        response = auth_client.get('/billing/portal', follow_redirects=True)
         # May redirect to Stripe portal
         assert response.status_code in [200, 302]
 
@@ -233,7 +233,7 @@ class TestErrorHandlers:
 
     def test_404_page(self, client):
         """Test 404 error page"""
-        response = client.get('/nonexistent-page')
+        response = client.get('/nonexistent-page', follow_redirects=True)
         assert response.status_code == 404
 
     def test_403_forbidden(self, client, regular_user):
@@ -243,9 +243,9 @@ class TestErrorHandlers:
             client.post('/auth/login', data={
                 'username': 'user',
                 'password': 'user123'
-            })
+            }, follow_redirects=True)
 
-            response = client.get('/admin/users')
+            response = client.get('/admin/users', follow_redirects=True)
             assert response.status_code in [403, 302]
 
 
@@ -272,11 +272,11 @@ class TestPaginationViews:
         db_session.commit()
 
         # Test page 1
-        response = auth_client.get('/candidates?page=1')
+        response = auth_client.get('/candidates?page=1', follow_redirects=True)
         assert response.status_code == 200
 
         # Test page 2
-        response = auth_client.get('/candidates?page=2')
+        response = auth_client.get('/candidates?page=2', follow_redirects=True)
         assert response.status_code == 200
 
 
@@ -288,7 +288,7 @@ class TestFormValidation:
         response = auth_client.post('/candidates/add', data={
             # Missing first_name and last_name
             'email1': 'test@example.com'
-        })
+        }, follow_redirects=True)
 
         # Should show validation errors
         assert response.status_code in [200, 400]
@@ -299,7 +299,7 @@ class TestFormValidation:
         response = auth_client.post('/companies/add', data={
             # Missing name
             'city': 'Test City'
-        })
+        }, follow_redirects=True)
 
         # Should show validation errors
         assert response.status_code in [200, 400]
@@ -314,7 +314,7 @@ class TestCSRFProtection:
         response = auth_client.post('/candidates/add', data={
             'first_name': 'Test',
             'last_name': 'Candidate'
-        })
+        }, follow_redirects=True)
 
         # With CSRF enabled, this should fail without token
         # With CSRF disabled in tests, it should succeed
